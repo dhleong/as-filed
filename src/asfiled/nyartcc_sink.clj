@@ -91,14 +91,15 @@
         row)))
   (get-preferred-routes [this from to]
     (when-let [rows (preferred-route-search from to)]
-      (map 
-        (fn [row]
-          (assoc 
-            (zipmap 
-              [:from :route :to :area :altitude :aircraft]
-              (row-contents row))
-            :preferred (string? (get-in row [:attrs :class]))))
-        rows))))
+      (->> (map 
+             (fn [row]
+               (assoc 
+                 (zipmap 
+                   [:from :route :to :area :altitude :aircraft]
+                   (row-contents row))
+                 :preferred (string? (get-in row [:attrs :class]))))
+             rows)
+           (filter #(identity (:route %)))))))
 
 (defn create-sink 
   "Instantiate a nyartcc-based Sink"

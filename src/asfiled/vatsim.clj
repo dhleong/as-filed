@@ -64,7 +64,9 @@
     {:callsign (first parts)
      :craft (nth parts 9)
      :depart (nth parts 11)
-     :cruise (Integer/parseInt (nth parts 12))
+     :cruise (try
+               (Integer/parseInt (nth parts 12))
+               (catch NumberFormatException e (nth parts 12)))
      :arrive (nth parts 13)
      :remarks (nth parts 29)
      :route (nth parts 30)
