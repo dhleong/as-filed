@@ -113,12 +113,16 @@
       cache-data
       (let [raw (load-data)
             parsed (parse-data raw)]
-        (swap! data-cache-expires (constantly (t/now)))
+        ; TODO use the "reload" general setting for expiry?
+        (swap! data-cache-expires 
+               (constantly (t/plus (t/now) (t/minutes 2))))
         (swap! data-cache (constantly parsed))))))
 
 (defn get-aircraft
   "Load an aircraft by its callsign.
-  The aircraft data may be prefile OR online"
+  The aircraft data may be prefile OR online.
+  Cached data will be used when possible, and the
+  cache will be updated as appropriate."
   [callsign]
   (if-let [data (update-data)]
     (or

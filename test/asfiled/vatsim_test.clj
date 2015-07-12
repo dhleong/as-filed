@@ -33,8 +33,8 @@
 
 (deftest data-test
   (testing "Load data"
-    (with-fake-http [#"vatsim-data.txt$" data-raw]
-      ;; NB: urls should still be cached
+    (with-fake-http [#"status.txt$" data-urls-raw
+                     #"vatsim-data.txt$" data-raw]
       (let [loaded (load-data)]
         (is (= data-raw loaded)))))
   (testing "Parse data"
@@ -58,7 +58,8 @@
 
 (deftest getter-tests
   (testing "get-aircraft"
-    (with-fake-http [#"vatsim-data.txt$" data-raw]
+    (with-fake-http [#"status.txt$" data-urls-raw
+                     #"vatsim-data.txt$" data-raw]
       (let [my-mal (get-aircraft mal-callsign)
             my-wash (get-aircraft wash-callsign)]
         ;; NB the actual parsing is tested above
