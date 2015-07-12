@@ -6,7 +6,8 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [clj-time "0.10.0"]
                  [http-kit "2.1.18"]
-                 [http-kit.fake "0.2.1"]]
+                 [http-kit.fake "0.2.1"]
+                 [hickory "0.5.4"]]
   :main ^:skip-aot asfiled.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})
