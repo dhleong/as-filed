@@ -5,7 +5,12 @@
             [cheshire.core :refer [generate-string]]))
 
 (def mock-result
-  {:plan {:points [{:th "281"}]}})
+  (generate-string
+    {:plan {:points [{:name "LAGUARDIA" :th "281"}]}}))
+
+(def mock-result-failure
+  (generate-string
+    {:plan {:points [{:name "LAGUARDIA"}]}}))
 
 (def sop-exits-klga
   {:north [[290 360] [0 15]]
@@ -15,8 +20,11 @@
 
 (deftest load-bearing-test
   (testing "Load degrees"
-    (with-fake-http [#"dataLayer$" (generate-string mock-result)]
-      (is (= 281 (load-bearing-to "klga" "kord"))))))
+    (with-fake-http [#"dataLayer$" mock-result]
+      (is (= 281 (load-bearing-to "klga" "kord")))))
+  (testing "Gracefulness (eg VFR)"
+    (with-fake-http [#"dataLayer$" mock-result-failure]
+      (is (nil? (load-bearing-to "klga" "vfr"))))))
 
 (deftest get-exit-test
   (testing "Get exit"

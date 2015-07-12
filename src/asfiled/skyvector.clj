@@ -14,12 +14,12 @@
         options {:query-params {:cmd "planPts" :d path}}
         {:keys [err body]} @(http/get calculate-url options)]
     (when-let [json (parse-string body true)]
-      (-> json
-          :plan
-          :points
-          first
-          :th ;; "true degrees"; :mh for magnetic
-          Integer/parseInt))))
+      (when-let [degrees (-> json
+                           :plan
+                           :points
+                           first
+                           :th)] ;; "true degrees"; :mh for magnetic 
+        (Integer/parseInt degrees)))))
 
 (defn get-bearing-to
   "See load-bearing-to. This method might cache results"
