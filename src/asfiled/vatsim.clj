@@ -58,9 +58,17 @@
       body)))
 
 (defn parse-client-data
+  "Parse a raw line of client data into a nice map"
   [raw]
   (let [parts (split raw #":")]
-    {:callsign (first parts)}))
+    {:callsign (first parts)
+     :craft (nth parts 9)
+     :depart (nth parts 11)
+     :cruise (Integer/parseInt (nth parts 12))
+     :arrive (nth parts 13)
+     :remarks (nth parts 29)
+     :route (nth parts 30)
+     }))
 
 (defn- parse-data-line
   [dict line]

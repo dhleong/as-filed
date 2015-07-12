@@ -50,11 +50,20 @@
   (testing "parse mal"
     (let [parsed (parse-client-data mal)]
       (is (= mal-callsign (:callsign parsed)))
+      (is (= "KMIA" (:depart parsed)))
+      (is (= "KBOS" (:arrive parsed)))
+      (is (= 35000 (:cruise parsed)))
+      (is (= "T/B738/F" (:craft parsed)))
+      (is (= "+HEDLY2 HEDLY J53 CRG J55 RDU J55 HPW PXT J191 RBV J222 JFK ROBUC1" (:route parsed)))
       ))
-  (testing "parse wash"
+ (testing "parse wash"
     (let [parsed (parse-client-data wash)]
       (is (= wash-callsign (:callsign parsed)))
-      )))
+      (is (= "KPIT" (:depart parsed)))
+      (is (= "KIAD" (:arrive parsed)))
+      (is (= 23000 (:cruise parsed)))
+      (is (= "A321" (:craft parsed)))
+      (is (= "MGW GIBBZ2" (:route parsed))))))
 
 (deftest getter-tests
   (testing "get-aircraft"
