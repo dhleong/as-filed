@@ -56,8 +56,12 @@
     (println "* Traveling to" 
              (-> data :arrive :name) 
              (str "(" (-> data :arrive :icao) ")"))
-    ;; TODO it'd be nice if we could get the direction
-    ;;  to the destination
+    (when-let [exits (-> data :exits)]
+      (if-let [gate (:gate exits)]
+        (println "  - Via the" (upper-case (name gate)) "gate")
+        (println "  - Bearing" (:bearing exits)))
+      (if-let [exit-points (:exits exits)]
+        (println "  - Valid exits:" exit-points)))
     ;; prefered routes
     (when-let [routes (seq (-> data :preferred-routes))]
       (println "* PREFERRED ROUTES")

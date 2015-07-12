@@ -115,6 +115,7 @@
   :craft 'A321/L'
   :depart 'KLGA'
   :arrive 'KIAD'
+  :exits {:bearing 238 :gate :west :exits ['PARKE' 'LANNA']}
   :route 'Route'} ; optional"
   [sink client]
   {:pre [(satisfies? Sink sink)]}
@@ -122,6 +123,7 @@
         craft (cached-aircraft sink (aircraft-type client))
         ;; presumably you know the departure airport...
         arrive (cached-airport sink (:arrive client))
+        exits (future (snk/get-valid-exits sink (:arrive client))) ;; should we cache this?
         preferred-routes (cached-preferred-routes
                            sink 
                            (:depart client)
@@ -129,6 +131,7 @@
         equip (equipment-type client)]
     {:airline @airline
      :craft @craft
+     :exits @exits
      :preferred-routes @preferred-routes
      :arrive @arrive
      :equip equip}))

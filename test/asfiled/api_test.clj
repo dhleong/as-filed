@@ -22,7 +22,11 @@
         :area ""
         :aircraft "RNAV"
         :alititude "FL180-FL220"
-        :preferred true }])))
+        :preferred true }])
+    (get-valid-exits [this to]
+      {:bearing 238
+       :gate :west
+       :exits ["LANNA"]})))
 
 (def client
   {:callsign "BAW123"
@@ -59,4 +63,5 @@
       (is (= "Speedbird" (-> result :airline :telephony)))
       (is (= "A-321" (-> result :craft :model)))
       (is (= 1 (-> result :preferred-routes count)))
-      (is (= :mode-c (-> result :equip :transponder)))))) 
+      (is (= :mode-c (-> result :equip :transponder)))
+      (is (= :west (-> result :exits :gate)))))) 

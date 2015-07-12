@@ -34,4 +34,16 @@
        :area ''
        :altitude '110-FL210'
        :aircraft 'TURBOJET RNAV ONLY'
-       :preferred true}]"))
+       :preferred true}]")
+  (get-valid-exits
+    [this arrive]
+    "Given ICAO codes for arrival airports,
+    (and assuming a knowledge of the departure airpot)
+    return a map describing the expected exits:
+    {:gate :east
+     :bearing 90
+     :exits ['MERIT', 'GREKI']}
+    This method is optional; if no SOP for the facility
+    is available, you may return nil. If you don't have
+    the SOP but can calculate the bearing, it is acceptable
+    to return only eg {:bearing 90}"))

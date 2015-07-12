@@ -6,7 +6,10 @@
             [hickory
              [core :refer [parse parse-fragment as-hickory]]
              [select :as s]]
-            [asfiled.sink :as snk :refer [Sink]]))
+            [asfiled 
+             [nyartcc-sop :refer [get-sop]]
+             [sink :as snk :refer [Sink]]
+             [skyvector :refer [get-bearing-to get-exit-to]]]))
 
 (def url-ais "http://nyartcc.org/aacisa")
 (def url-prd "http://nyartcc.org/prd/ajax.php")
@@ -99,7 +102,14 @@
                    (row-contents row))
                  :preferred (string? (get-in row [:attrs :class]))))
              rows)
-           (filter #(identity (:route %)))))))
+           (filter #(identity (:route %))))))
+  (get-valid-exits [this to]
+    (when-let [bearing (get-bearing-to my-icao to)]
+      (let [sop (get-sop my-icao)
+            gate (if sop (get-exit-to (:exit-intervals sop) bearing))]
+        {:bearing bearing
+         :gate gate
+         :exits (if sop (get (:exit-gates sop) gate))}))))
 
 (defn create-sink 
   "Instantiate a nyartcc-based Sink"
