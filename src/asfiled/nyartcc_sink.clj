@@ -4,7 +4,7 @@
   (:require [clojure.string :refer [trim]]
             [org.httpkit.client :as http] 
             [hickory
-             [core :refer [parse-fragment as-hickory]]
+             [core :refer [parse parse-fragment as-hickory]]
              [select :as s]]
             [asfiled.sink :as snk :refer [Sink]]))
 
@@ -48,6 +48,17 @@
                   tree)
         first)))
 
+(defn- do-trim [string]
+  (if (nil? string)
+    nil
+    (trim string)))
+
+(defn- row-contents [tr]
+  (->> (s/select
+         (s/tag :td)
+         tr)
+       (map #(-> % :content first do-trim))))
+
 (defn- aviation-row
   "Convenience when you only need the contents of the first
   row of aviation-table"
@@ -60,17 +71,6 @@
            table)
          first
          row-contents)))
-
-(defn do-trim [string]
-  (if (nil? string)
-    nil
-    (trim string)))
-
-(defn- row-contents [tr]
-  (->> (s/select
-         (s/tag :td)
-         tr)
-       (map #(-> % :content first do-trim))))
 
 (deftype NyArtccSink [my-icao]
   Sink
@@ -99,3 +99,8 @@
               (row-contents row))
             :preferred (string? (get-in row [:attrs :class]))))
         rows))))
+
+(defn create-sink 
+  "Instantiate a nyartcc-based Sink"
+  [local-icao]
+  (NyArtccSink. local-icao))
