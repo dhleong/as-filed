@@ -26,12 +26,6 @@
   [icao-from icao-to]
   (load-bearing-to icao-from icao-to))
 
-(def sop-exits-klga
-  {:north [[290 360] [0 15]]
-   :east [[16 95]]
-   :south [[96 215]]
-   :west [[216 289]]})
-
 (defn get-exit-to
   "Get the semantic exit name to an airport based on
   the bearing and the provided SOP data. The data should
