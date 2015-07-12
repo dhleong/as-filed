@@ -9,16 +9,30 @@
             [asfiled.sink :as snk :refer [Sink]]))
 
 (def url-ais "http://nyartcc.org/aacisa")
+(def url-prd "http://nyartcc.org/prd/ajax.php")
 
 (defn- aviation-search 
   "Fire up the AIS, Aviation Information Search.
-  Returns the html result parsed as as-hickory"
+  Returns the html result parsed with as-hickory"
   [query]
   (let [options {:form-params {:s query}}
         {:keys [err body]} @(http/post url-ais options)]
     (if err
       nil
       (-> body parse as-hickory))))
+
+(defn- preferred-route-search 
+  "Search for a preferred route between airports.
+  Returns the html result parsed with as-hickory"
+  [from to]
+  (let [options {:form-params {:dep from :arr to}}
+        {:keys [err body]} @(http/post url-prd options)]
+    (if err
+      nil
+      (->> (str "<table>" body "</table>") ; wrap it so hickory is happy
+           parse 
+           as-hickory
+           (s/select (s/tag :tr))))))
 
 (defn- aviation-table
   "Convenience around aviation-search; filters down
@@ -41,11 +55,22 @@
   (when-let [table (aviation-table query header-title)]
     (->> (s/select 
            (s/child 
-             (s/nth-child 2) 
-             (s/tag :tr)
-             (s/tag :td))
+             (s/nth-child 2) ; skip the header row
+             (s/tag :tr))
            table)
-         (map #(-> % :content first trim)))))
+         first
+         row-contents)))
+
+(defn do-trim [string]
+  (if (nil? string)
+    nil
+    (trim string)))
+
+(defn- row-contents [tr]
+  (->> (s/select
+         (s/tag :td)
+         tr)
+       (map #(-> % :content first do-trim))))
 
 (deftype NyArtccSink [my-icao]
   Sink
@@ -65,8 +90,12 @@
         [:icao :name] 
         row)))
   (get-preferred-routes [this from to]
-    [{:route "PARKE HYPER#"
-      :area ""
-      :aircraft "RNAV"
-      :alititude "FL180-FL220"
-      :preferred true }]))
+    (when-let [rows (preferred-route-search from to)]
+      (map 
+        (fn [row]
+          (assoc 
+            (zipmap 
+              [:from :route :to :area :altitude :aircraft]
+              (row-contents row))
+            :preferred (string? (get-in row [:attrs :class]))))
+        rows))))
