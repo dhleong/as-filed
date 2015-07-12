@@ -1,9 +1,9 @@
 (ns ^{:author "Daniel Leong"
       :doc "Vatsim interactions"}
   asfiled.vatsim
-  (:require [org.httpkit.client :as http]
-            [clojure.string :refer [split-lines]]
-            ))
+  (:require [clojure.string :refer [split-lines split lower-case]]
+            [org.httpkit.client :as http] 
+            [clj-time.core :as t]))
 
 ;;;
 ;;; Constants
@@ -20,6 +20,8 @@
 ;;;
 
 (def data-urls (atom false))
+(def data-cache-expires (atom (t/now)))
+(def data-cache (atom {}))
 
 ;;
 ;; Functions
@@ -54,6 +56,74 @@
     (if error
       (throw (IllegalStateException. error))
       body)))
+
+(defn parse-client-data
+  [raw]
+  (let [parts (split raw #":")]
+    {:callsign (first parts)}))
+
+(defn- parse-data-line
+  [dict line]
+  (cond
+    ;; mode line
+    (.startsWith line "!")
+    [[:mode-] (.substring line 
+                          0
+                          (.indexOf line ":"))]
+    ;; data line
+    (not (or (empty? line) (.startsWith line ";")))
+    (case (:mode- dict)
+      "!GENERAL" 
+      (let [[k v] (split line #" = ")
+            key-symbol (-> k
+                           lower-case
+                           (.replace " " "-"))]
+        [[(keyword key-symbol)] v])
+      "!CLIENTS"
+      (let [client (parse-client-data line)]
+        [[:clients (:callsign client)] client])
+      "!PREFILE"
+      (let [client (parse-client-data line)]
+        [[:prefile (:callsign client)] client])
+      ;; unhandled section
+      nil)))
+
+(defn parse-data
+  "Parse raw data into a usable map"
+  [data]
+  (loop [lines (split-lines data)
+         dict {}]
+    (if (empty? lines)
+      dict
+      (if-let [[k v] (parse-data-line dict (first lines))]
+        ; success!
+        (recur (rest lines)
+               (assoc-in dict k v))
+        ; empty line
+        (recur (rest lines)
+               dict)))))
+
+(defn- update-data
+  "Ensure we have data cached and up-to-date"
+  []
+  (let [cache-expires @data-cache-expires
+        cache-data @data-cache]
+    (if (-> cache-expires (t/after? (t/now)))
+      ;; data valid!
+      cache-data
+      (let [raw (load-data)
+            parsed (parse-data raw)]
+        (swap! data-cache-expires (constantly (t/now)))
+        (swap! data-cache (constantly parsed))))))
+
+(defn get-aircraft
+  "Load an aircraft by its callsign.
+  The aircraft data may be prefile OR online"
+  [callsign]
+  (if-let [data (update-data)]
+    (or
+      (get-in data [:clients callsign])
+      (get-in data [:prefile callsign]))))
 
 (defn load-metar
   "Load the metar for an airport"
