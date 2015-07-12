@@ -7,7 +7,8 @@
                  [clj-time "0.10.0"]
                  [http-kit "2.1.18"]
                  [http-kit.fake "0.2.1"]
-                 [hickory "0.5.4"]]
+                 [hickory "0.5.4"]
+                 [cheshire "5.4.0"]]
   :main ^:skip-aot asfiled.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})
