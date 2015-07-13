@@ -12,6 +12,10 @@
   (generate-string
     {:plan {:points [{:name "LAGUARDIA"}]}}))
 
+(def mock-vor-result
+  (generate-string
+    {:plan {:points [{:name "LAGUARDIA"} {:name "BRIDGEPORT" :type "VOD"}]}}))
+
 (def sop-exits-klga
   {:north [[290 360] [0 15]]
    :east [[16 95]]
@@ -25,6 +29,13 @@
   (testing "Gracefulness (eg VFR)"
     (with-fake-http [#"dataLayer$" mock-result-failure]
       (is (nil? (load-bearing-to "klga" "vfr"))))))
+
+(deftest load-vor-test
+  (testing "Load VOR"
+    (with-fake-http [#"dataLayer$" mock-vor-result]
+      (let [loaded (load-vor "klga" "bdr")]
+        (is (= "BRIDGEPORT" (:name loaded)))
+        (is (= "VOD" (:type loaded)))))))
 
 (deftest get-exit-test
   (testing "Get exit"

@@ -6,25 +6,42 @@
 
 (def calculate-url "http://skyvector.com/api/dataLayer")
 
+(defn- calculate-path
+  [from to]
+  (let [path (str from " " to)
+        options {:query-params {:cmd "planPts" :d path}}
+        {:keys [err body]} @(http/get calculate-url options)]
+    (when-let [json (parse-string body true)]
+      (-> json
+          :plan
+          :points))))
+
 (defn load-bearing-to 
   "Get the bearing in degrees from one
   airport to another. Uses skyvector.com"
   [icao-from icao-to]
-  (let [path (str icao-from " " icao-to)
-        options {:query-params {:cmd "planPts" :d path}}
-        {:keys [err body]} @(http/get calculate-url options)]
-    (when-let [json (parse-string body true)]
-      (when-let [degrees (-> json
-                           :plan
-                           :points
-                           first
-                           :th)] ;; "true degrees"; :mh for magnetic 
-        (Integer/parseInt degrees)))))
+  (when-let [degrees (-> (calculate-path icao-from icao-to)
+                         first
+                         :th)] ;; "true degrees"; :mh for magnetic 
+    (Integer/parseInt degrees)))
+
+(defn load-vor
+  "Lookup a VOR/Navaid/airport. An ICAO for an airport
+  must be provided for reference since some symbols may
+  be reused. Uses skyvector.com"
+  [icao-from id]
+  (-> (calculate-path icao-from id)
+      second))
 
 (defn get-bearing-to
   "See load-bearing-to. This method might cache results"
   [icao-from icao-to]
   (load-bearing-to icao-from icao-to))
+
+(defn get-vor
+  "See get-vor. This method might cache results"
+  [icao-from id]
+  (load-vor icao-from id))
 
 (defn get-exit-to
   "Get the semantic exit name to an airport based on
