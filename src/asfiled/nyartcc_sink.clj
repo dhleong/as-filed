@@ -77,6 +77,7 @@
 
 (deftype NyArtccSink [my-icao]
   Sink
+  (get-facility [this] my-icao)
   (get-aircraft [this aircraft]
     (when-let [row (aviation-row aircraft "Aircraft Results")]
       (zipmap

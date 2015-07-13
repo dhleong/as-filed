@@ -5,6 +5,7 @@
 
 (def dummy-sink 
   (reify Sink
+    (get-facility [this] "KLGA")
     (get-aircraft [this aircraft]
       {:model "A-321"
        :manufacturer "Airbus"

@@ -5,6 +5,7 @@
 (defprotocol Sink
   "Protocol for fetching data needed in asFiled.
   All methods block; async handling can be done elsewhere"
+  (get-facility [this] "Get the ICAO for the local facility")
   (get-aircraft
     [this aircraft-type]
     "Load aircraft info for the given type, eg: A321.
