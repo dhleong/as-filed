@@ -24,3 +24,15 @@
   (testing "not"
     (is (true? (match-tag :baz {:not [:bar :foo]})))
     (is (not (match-tag :foo {:not [:bar :foo]})))))
+
+(deftest select-sid-test
+  (testing "lga 13/22; jfk 13/ils22"
+    (let [desc (select-sid
+                 sop-klga 
+                 [:lga-depart-13 :lga-land-22
+                  :jfk-depart-13 :jfk-land-ils22])]
+      (is (true? (-> desc (.contains "All Types"))))
+      (is (true? (-> desc (.contains "All Gates"))))
+      (is (true? (-> desc (.contains "FLUSHING"))))
+      (is (true? (-> desc (.contains "TNNIS"))))
+      )))
