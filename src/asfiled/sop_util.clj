@@ -24,6 +24,16 @@
         ;; rvr range
         (within-range (:rvr weather) (:rvr runway))))))
 
+(defn match-tag
+  [tag tag-descriptor]
+  (if (map? tag-descriptor)
+    ;; :any or :not
+    (case (-> tag-descriptor keys first)
+      :any (contains? (:any tag-descriptor) tag)
+      :not (not (contains? (:any tag-descriptor) tag)))
+    ;; exact match
+    (= tag tag-descriptor)))
+
 (defn select-runways
   "Given weather conditions and an SOP,
   figure out what runway configuration
@@ -38,3 +48,9 @@
     (when-let [matched (filter #(match-runway weather %) runways)]
       {:runways (join "\n" (map :use matched))
        :tags (apply concat (map :tags matched))})))
+
+(defn select-sid
+  "Given a set of tags (as returned from select-runways)
+  and an SOP, figure out which SID should be used."
+  [sop tags]
+  nil)

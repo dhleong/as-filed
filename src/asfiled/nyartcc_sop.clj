@@ -1,12 +1,19 @@
 (ns ^{:author "Daniel Leong"
       :doc "SOPs for nyartcc"}
   asfiled.nyartcc-sop
-  (:require [clojure.string :refer [upper-case]]))
+  (:require [clojure.string :refer [upper-case join]]))
 
 (def sop-runways-kjfk
   [{:when {:speed [0 4] :dir [[0 360]]}
     :use "JFK: Depart: 31L/R  Land: 31L/R"
     :tags [:jfk-depart-31 :jfk-land-31]}])
+
+(def lga-land-catchall
+  {:not [:lga-land-22]})
+(def jfk-depart-catchall
+  {:any [:jfk-depart-22r :jfk-depart-13 :jfk-depart-4l]})
+(def jfk-land-catchall
+  {:any [:jfk-land-4 :jfk-land-dme22l :jfk-land-22l]})
 
 (def sop-klga
   {:exit-intervals
@@ -31,13 +38,54 @@
      ;; merge with JFK to get its tags
      sop-runways-kjfk)
    :sid-selection
-   [{:when [:lga-depart-13 {:not [:lga-land-22]}
+   [{:when [:lga-depart-13 lga-land-catchall
             :jfk-depart-13 :jfk-land-ils13]
-     :type :jets
-     :gates :any
-     :climb "FLUSHING"
-     :rnav "TNNIS#"}]
+     :use "(All Types) (All Gates) [FLUSHING] [TNNIS#]"}
+    {:when [:lga-depart-13 lga-land-catchall
+            :jfk-depart-13 :jfk-land-ils22]
+     :use "(All Types) (All Gates) [FLUSHING] [TNNIS#]"}
+    {:when [:lga-depart-13 lga-land-catchall
+            :jfk-depart-13 :jfk-land-vor13]
+     :use "(All Types) (All Gates) [WHITESTONE] [TNNIS#]"}
+    {:when [:lga-depart-13 lga-land-catchall
+            :jfk-depart-31 :jfk-land-ils22]
+     :use "(All Types) (All Gates) [FLUSHING] [TNNIS#]"}
+    {:when [:lga-depart-13 lga-land-catchall
+            :jfk-depart-31 {:not [:jfk-land-ils22]}]
+     :use "(All Types) (All Gates) [WHITESTONE] [TNNIS#]"}
+    {:when [:lga-depart-13 lga-land-catchall
+            :jfk-depart-22r :jfk-land-ils22]
+     :use (join "\n"
+                ["JETS (South Gates) [WHITESTONE] [NTHNS#]"
+                 "JETS (W/N/E Gates) [MASPETH]    [GLDMN#]"
+                 "PROP (All Gates)   [FLUSHING**] [TNNIS#]"])}
+    {:when [:lga-depart-13 :lga-land-22
+            jfk-depart-catchall jfk-land-catchall]
+     :use (join "\n"
+                ["JETS (South Gates) [CONEY]      [NTHNS#]"
+                 "JETS (W/N   Gates) [MASPETH]    [GLDMN#]"
+                 "JETS (East  Gates) [WHITESTONE] [TNNIS#]"
+                 "PROP (All Gates)   [WHITESTONE] [TNNIS#]"])}
+    {:when [:lga-depart-13 lga-land-catchall
+            jfk-depart-catchall jfk-land-catchall]
+     :use (join "\n"
+                ["JETS (South Gates) [CONEY]      [NTHNS#]"
+                 "JETS (W/N/E Gates) [WHITESTONE] [TNNIS#]"
+                 "PROP (All Gates)   [WHITESTONE] [TNNIS#]"])}
+    {:when [:lga-depart-22 :lga-land-22
+            :jfk-depart-31 :jfk-land-31]
+     :use "(All Types) (All Gates) [As Publish] [JUTES#]"}
+    {:when [:lga-depart-22 :lga-land-22
+            {:not [:jfk-depart-31]} :jfk-land-13]
+     :use "(All Types) (All Gates) [As Publish] [JUTES#]"}
+    {:when [:lga-depart-22 :lga-land-22
+            {:not [:jfk-depart-31]} {:any [:jfk-land-4 :jfk-land-22]}]
+     :use (join "\n"
+                ["ALL  (W/N/E Gates) [As Publish] [JUTES#]"
+                 "JETS (South Gates) [Mimic RNAV] [HOPEA#]"])}
+    ]
    })
+
 ;; NB: For runway selection, we examine ALL options
 ;;  and evaluate ALL matches. This means we merge
 ;;  the tags and merge the :use strings, in the

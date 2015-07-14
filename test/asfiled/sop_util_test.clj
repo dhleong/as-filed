@@ -13,3 +13,12 @@
       (is (= [:lga-depart-31 :lga-land-22 :jfk-depart-31 :jfk-land-31]
              (:tags config)))
       (is (= 0 (-> text (.indexOf "LGA: Depart: 31")))))))
+
+(deftest match-tag-test
+  (testing "exact"
+    (is (true? (match-tag :foo :foo)))
+    (is (false? (match-tag :bar :foo))))
+  (testing "any"
+    (is (true? (match-tag :foo {:any [:bar :foo]})))
+    (is (false? (match-tag :bar {:any [:bar :foo]})))
+    ))
