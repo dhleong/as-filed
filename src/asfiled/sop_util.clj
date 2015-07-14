@@ -24,13 +24,17 @@
         ;; rvr range
         (within-range (:rvr weather) (:rvr runway))))))
 
+(defn- has-tag
+  [vect tag]
+  (some #(= % tag) vect))
+
 (defn match-tag
   [tag tag-descriptor]
   (if (map? tag-descriptor)
     ;; :any or :not
     (case (-> tag-descriptor keys first)
-      :any (contains? (:any tag-descriptor) tag)
-      :not (not (contains? (:any tag-descriptor) tag)))
+      :any (has-tag (:any tag-descriptor) tag)
+      :not (not (has-tag (:not tag-descriptor) tag)))
     ;; exact match
     (= tag tag-descriptor)))
 

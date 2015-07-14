@@ -17,8 +17,10 @@
 (deftest match-tag-test
   (testing "exact"
     (is (true? (match-tag :foo :foo)))
-    (is (false? (match-tag :bar :foo))))
+    (is (not (match-tag :bar :foo))))
   (testing "any"
     (is (true? (match-tag :foo {:any [:bar :foo]})))
-    (is (false? (match-tag :bar {:any [:bar :foo]})))
-    ))
+    (is (not (match-tag :baz {:any [:bar :foo]}))))
+  (testing "not"
+    (is (true? (match-tag :baz {:not [:bar :foo]})))
+    (is (not (match-tag :foo {:not [:bar :foo]})))))
