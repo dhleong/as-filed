@@ -1,7 +1,7 @@
 (ns ^{:author "Daniel Leong"
       :doc "Command-line interface"}
   asfiled.core
-  (:require [clojure.string :refer [upper-case]]
+  (:require [clojure.string :refer [upper-case split join]]
             [clojure.tools.nrepl.server :refer [start-server stop-server]]
             [asfiled
              [api :refer [analyze]]
@@ -17,6 +17,7 @@
 
 (def prompt-text "\nCallsign/VOR")
 (def nrepl-port 7888)
+(defonce runway-config nil)
 
 ;;
 ;; Util methods
@@ -92,8 +93,13 @@
                    "\t"
                    (pad (:altitude route) longest-alt)
                    "\t"
-                   (:aircraft route)))))))
+                   (:aircraft route)))))
+    ;; if we have a runway config, remind us
+    (when-let [last-config runway-config]
+      (println "* Current SID")
+      (format-config last-config))))
 
+      
 (defn read-aircraft
   [depart sink callsign]
   (println "Callsign" callsign "not found.")
@@ -114,6 +120,7 @@
 
 (defn- cli-vor
   [sink input]
+  (println "Searching for" input "...")
   (let [local (snk/get-facility sink)]
     (if-let [vor (get-vor local input)]
       (do (println "* VOR" (:id vor))
@@ -123,14 +130,35 @@
 
 (defn- cli-aircraft 
   [sink input]
+  (println "Searching for" input "...")
   (let [local (snk/get-facility sink)]
     (if-let [live (get-aircraft (upper-case input))]
       (handle-aircraft local sink live)
       (read-aircraft local sink input))))
 
+(defn- format-config [config]
+  (println (join "\n"
+                 (map str
+                      (repeat "  - ")
+                      (split config #"\n")))))
+
+(defn- cli-runways
+  [sink input]
+  (let [parts (-> input .trim (split #" +") rest) 
+        tags (map keyword parts)]
+    (if (empty? parts)
+      (if-let [last-config runway-config]
+        (format-config last-config)
+        (println "No runway configuration yet"))
+      (when-let [config (snk/get-sid sink tags)]
+        (def runway-config config)
+        (println "* For runway tags" tags)
+        (format-config config)))))
+
 (defn- pick-cli-handler [input]
   (cond 
     (= 3 (count input)) cli-vor
+    (true? (-> input (.startsWith ".rwy"))) cli-runways
     :else cli-aircraft))
 
 (defn -main
@@ -146,6 +174,5 @@
   (loop [input ""]
     (when-not (empty? input)
       (let [handler (pick-cli-handler input)]
-        (println "Searching for" input "...")
         (handler sink input))) 
     (recur (prompt prompt-text))))
