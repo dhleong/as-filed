@@ -33,7 +33,7 @@
        :tags [:lga-depart-31 :lga-land-22]}
       {:when {:speed [5 14] :dir [[315 360] [0 44]]}
        :use "LGA: Depart: 4  Land: VMC EXP31, IMC LOC31"
-       :tags (:lga-depart-4 :lga-land-31)}
+       :tags [:lga-depart-4 :lga-land-31]}
       ]
      ;; merge with JFK to get its tags
      sop-runways-kjfk)

@@ -15,7 +15,7 @@
 ;; Constants
 ;;
 
-(def prompt-text "Callsign/VOR")
+(def prompt-text "\nCallsign/VOR")
 (def nrepl-port 7888)
 
 ;;
@@ -137,14 +137,12 @@
   "Interactive command-line interface"
   [& args]
   ;; repl
-  (println "Init Repl...")
   (defonce nrepl-server (start-server :port nrepl-port))
   (println "Repl available on" nrepl-port)
   ;; use defs so we can re-def via repl if desired
-  (def local (or (first args) "KLGA"))
-  (def sink (create-sink local))
+  (def sink (create-sink (or (first args) "KLGA")))
   ;; now do the loop!
-  (println "Ready at" local)
+  (println "Ready at" (snk/get-facility sink))
   (loop [input ""]
     (when-not (empty? input)
       (let [handler (pick-cli-handler input)]

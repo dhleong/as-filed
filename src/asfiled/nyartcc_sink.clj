@@ -9,7 +9,8 @@
             [asfiled 
              [nyartcc-sop :refer [get-sop]]
              [sink :as snk :refer [Sink]]
-             [skyvector :refer [get-bearing-to get-exit-to]]]))
+             [skyvector :refer [get-bearing-to get-exit-to]]
+             [sop-util :refer [select-runways select-sid]]]))
 
 (def url-ais "http://nyartcc.org/aacisa")
 (def url-prd "http://nyartcc.org/prd/ajax.php")
@@ -75,7 +76,7 @@
          first
          row-contents)))
 
-(deftype NyArtccSink [my-icao]
+(deftype NyArtccSink [my-icao ^:volatile-mutable runways]
   Sink
   (get-facility [this] my-icao)
   (get-aircraft [this aircraft]
@@ -110,9 +111,15 @@
             gate (if sop (get-exit-to (:exit-intervals sop) bearing))]
         {:bearing bearing
          :gate gate
-         :exits (if sop (get (:exit-gates sop) gate))}))))
+         :exits (if sop (get (:exit-gates sop) gate))})))
+  (get-runways [this weather] 
+    (when-let [sop (get-sop my-icao)]
+      (select-runways sop weather)))
+  (get-sid [this tags] 
+    (when-let [sop (get-sop my-icao)]
+      (select-sid sop tags))))
 
 (defn create-sink 
   "Instantiate a nyartcc-based Sink"
   [local-icao]
-  (NyArtccSink. local-icao))
+  (->NyArtccSink local-icao nil))

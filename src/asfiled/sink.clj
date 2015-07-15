@@ -47,4 +47,16 @@
     This method is optional; if no SOP for the facility
     is available, you may return nil. If you don't have
     the SOP but can calculate the bearing, it is acceptable
-    to return only eg {:bearing 90}"))
+    to return only eg {:bearing 90}")
+  (get-runways
+    [this weather]
+    "See sop-util.select-runways; implementations may
+    call that directly if they have an SOP
+    This method is optional; if no SOP for the facility
+    is available, you may return nil")
+  (get-sid
+    [this tags]
+    "Given a set of tags indicating runway configuration,
+    calculate the SID choices to use. 
+    This method is optional; if no SOP for the facility
+    is available, you may return nil."))
