@@ -23,7 +23,19 @@
     (is (not (match-tag :baz {:any [:bar :foo]}))))
   (testing "not"
     (is (true? (match-tag :baz {:not [:bar :foo]})))
-    (is (not (match-tag :foo {:not [:bar :foo]})))))
+    (is (not (match-tag :foo {:not [:bar :foo]}))))
+  (testing "from sop"
+    (is (true? (match-tag 
+                 :jfk-land-ils22 
+                 (-> sop-klga :sid-selection second :when last))))))
+
+(deftest match-sid-test
+  (testing "lga 13/22; jfk 13/ils22"
+    (let [match (match-sid
+                 [:lga-depart-13 :lga-land-22
+                  :jfk-depart-13 :jfk-land-ils22]
+                 (-> sop-klga :sid-selection second))]
+      (is (true? match)))))
 
 (deftest select-sid-test
   (testing "lga 13/22; jfk 13/ils22"
@@ -35,4 +47,27 @@
       (is (true? (-> desc (.contains "All Gates"))))
       (is (true? (-> desc (.contains "FLUSHING"))))
       (is (true? (-> desc (.contains "TNNIS"))))
-      )))
+      (is (false? (-> desc (.contains "WHITESTONE"))))
+      (is (false? (-> desc (.contains "\n"))))))
+  (testing "lga 13/22; jfk 22r/4"
+    (let [desc (select-sid
+                 sop-klga 
+                 [:lga-depart-13 :lga-land-22
+                  :jfk-depart-22r :jfk-land-4])]
+      (is (true? (-> desc (.contains "CONEY"))))
+      (is (true? (-> desc (.contains "MASPETH"))))
+      (is (true? (-> desc (.contains "WHITESTONE"))))
+      (is (true? (-> desc (.contains "NTHNS"))))
+      (is (true? (-> desc (.contains "GLDMN"))))
+      (is (true? (-> desc (.contains "TNNIS"))))
+      (is (false? (-> desc (.contains "\n\n"))))))
+  (testing "lga 22/22; jfk 31/31"
+    (let [desc (select-sid
+                 sop-klga 
+                 [:lga-depart-22 :lga-land-22
+                  :jfk-depart-31 :jfk-land-31])]
+      (is (true? (-> desc (.contains "All Types"))))
+      (is (true? (-> desc (.contains "All Gates"))))
+      (is (true? (-> desc (.contains "As Published"))))
+      (is (true? (-> desc (.contains "JUTES"))))
+      (is (false? (-> desc (.contains "\n")))))))

@@ -9,7 +9,7 @@
     :tags [:jfk-depart-31 :jfk-land-31]}])
 
 (def lga-land-catchall
-  {:not [:lga-land-22]})
+  {:not []})
 (def jfk-depart-catchall
   {:any [:jfk-depart-22r :jfk-depart-13 :jfk-depart-4l]})
 (def jfk-land-catchall
@@ -66,7 +66,7 @@
                  "JETS (W/N   Gates) [MASPETH]    [GLDMN#]"
                  "JETS (East  Gates) [WHITESTONE] [TNNIS#]"
                  "PROP (All Gates)   [WHITESTONE] [TNNIS#]"])}
-    {:when [:lga-depart-13 lga-land-catchall
+    {:when [:lga-depart-13 {:not [:lga-land-22]}
             jfk-depart-catchall jfk-land-catchall]
      :use (join "\n"
                 ["JETS (South Gates) [CONEY]      [NTHNS#]"
@@ -74,15 +74,15 @@
                  "PROP (All Gates)   [WHITESTONE] [TNNIS#]"])}
     {:when [:lga-depart-22 :lga-land-22
             :jfk-depart-31 :jfk-land-31]
-     :use "(All Types) (All Gates) [As Publish] [JUTES#]"}
+     :use "(All Types) (All Gates) [As Published] [JUTES#]"}
     {:when [:lga-depart-22 :lga-land-22
             {:not [:jfk-depart-31]} :jfk-land-13]
-     :use "(All Types) (All Gates) [As Publish] [JUTES#]"}
+     :use "(All Types) (All Gates) [As Published] [JUTES#]"}
     {:when [:lga-depart-22 :lga-land-22
             {:not [:jfk-depart-31]} {:any [:jfk-land-4 :jfk-land-22]}]
      :use (join "\n"
-                ["ALL  (W/N/E Gates) [As Publish] [JUTES#]"
-                 "JETS (South Gates) [Mimic RNAV] [HOPEA#]"])}
+                ["ALL  (W/N/E Gates) [As Published] [JUTES#]"
+                 "JETS (South Gates) [Follow  RNAV] [HOPEA#]"])}
     ]
    })
 

@@ -42,7 +42,7 @@
   [tags sid-descriptor]
   (let [tag-descriptor (:when sid-descriptor)]
     (when (= (count tags) (count tag-descriptor))
-      (and (map #(match-tag %1 %2) tags tag-descriptor)))))
+      (every? true? (map #(match-tag %1 %2) tags tag-descriptor)))))
 
 (defn select-runways
   "Given weather conditions and an SOP,
@@ -65,4 +65,4 @@
   [sop tags]
   (when-let [sids (:sid-selection sop)]
     (when-let [matched (filter #(match-sid tags %) sids)]
-      (join "\n" (map :use matched)))))
+      (join "\n\n" (map :use matched)))))
