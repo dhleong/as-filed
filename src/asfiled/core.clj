@@ -39,6 +39,13 @@
   [items selector]
   (reduce max (map #(count (get % selector)) items)))
 
+(defn- format-config [config]
+  (println (join "\n"
+                 (map str
+                      (repeat "  - ")
+                      (split config #"\n")))))
+
+
 ;;
 ;; Handler functions, possibly testable
 ;;
@@ -135,12 +142,6 @@
     (if-let [live (get-aircraft (upper-case input))]
       (handle-aircraft local sink live)
       (read-aircraft local sink input))))
-
-(defn- format-config [config]
-  (println (join "\n"
-                 (map str
-                      (repeat "  - ")
-                      (split config #"\n")))))
 
 (defn- cli-runways
   [sink input]
