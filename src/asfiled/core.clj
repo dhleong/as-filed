@@ -8,7 +8,7 @@
              [sink :as snk]
              [skyvector :refer [get-vor]]
              [nyartcc-sink :refer [create-sink]]
-             [vatsim :refer [get-aircraft]]])
+             [vatsim :refer [get-aircraft load-metar]]])
   (:gen-class))
 
 ;;
@@ -143,6 +143,15 @@
       (handle-aircraft local sink live)
       (read-aircraft local sink input))))
 
+(defn- cli-metar
+  [sink input]
+  (let [parts (split input #" +")
+        local (snk/get-facility sink)]
+    (cond 
+      (= 2 (count parts)) (-> parts second upper-case load-metar println)
+      (string? local) (println (load-metar local))
+      :else (println "Local facility not known"))))
+
 (defn- cli-runways
   [sink input]
   (let [parts (-> input .trim (split #" +") rest) 
@@ -159,7 +168,8 @@
 (defn- pick-cli-handler [input]
   (cond 
     (= 3 (count input)) cli-vor
-    (true? (-> input (.startsWith ".rwy"))) cli-runways
+    (-> input (.startsWith ".metar")) cli-metar
+    (-> input (.startsWith ".rwy")) cli-runways
     :else cli-aircraft))
 
 (defn -main
@@ -174,6 +184,7 @@
   (println "Ready at" (snk/get-facility sink))
   (loop [input ""]
     (when-not (empty? input)
-      (let [handler (pick-cli-handler input)]
-        (handler sink input))) 
+      (let [cleaned-input (-> input .trim)
+            handler (pick-cli-handler cleaned-input)]
+        (handler sink cleaned-input))) 
     (recur (prompt prompt-text))))

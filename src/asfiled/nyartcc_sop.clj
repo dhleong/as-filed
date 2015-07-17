@@ -6,7 +6,21 @@
 (def sop-runways-kjfk
   [{:when {:speed [0 4] :dir [[0 360]]}
     :use "JFK: Depart: 31L/R  Land: 31L/R"
-    :tags [:jfk-depart-31 :jfk-land-31]}])
+    :tags [:jfk-depart-31 :jfk-land-31]}
+   ;; > 4KT
+   {:when {:speed [5 999] :dir [[0 99]]}
+    :use "JFK: Depart: 4L  Land: 4R"
+    :tags [:jfk-depart-4 :jfk-land-4]}
+   {:when {:speed [5 999] :dir [[100 159]]}
+    :use "JFK: Depart: 13L/R  Land: 13L/R"
+    :tags [:jfk-depart-13 :jfk-land-13]}
+   {:when {:speed [5 999] :dir [[160 259]]}
+    :use "JFK: Depart: 22R  Land: 22L"
+    :tags [:jfk-depart-22r :jfk-land-22]}
+   {:when {:speed [5 999] :dir [[260 359]]}
+    :use "JFK: Depart: 31L/R  Land: 31L/R"
+    :tags [:jfk-depart-31 :jfk-land-31]}
+   ])
 
 (def lga-land-catchall
   {:not []})
