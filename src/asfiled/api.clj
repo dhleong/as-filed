@@ -1,7 +1,9 @@
 (ns ^{:author "Daniel Leong"
       :doc "Public API for programmatic access to asFiled"}
   asfiled.api
-  (:require [asfiled.sink :as snk :refer [Sink]]))
+  (:require [asfiled
+             [faa :as faa]
+             [sink :as snk :refer [Sink]]]))
 
 ;;
 ;; Constants
@@ -102,8 +104,12 @@
         cached
         ;; bummer; fetch and cache
         (let [resolved (snk/get-preferred-routes sink from to)]
-          (swap! cached-routes #(assoc % k resolved))
-          resolved)))))
+          (if (seq resolved)
+            (do (swap! cached-routes #(assoc % k resolved))
+                resolved)
+            (let [faa-routes (faa/load-preferred-routes from to)]
+              (swap! cached-routes #(assoc % k faa-routes))
+              faa-routes)))))))
 
 ;;
 ;; Main public API
