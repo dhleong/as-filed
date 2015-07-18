@@ -45,6 +45,20 @@
                     :gust 20 :dir-variable '(0 30)}
                    (decode-wind "000V03001G20KT")))))
 
+(deftest visibility-test
+  (testing "Visbility"
+    (is (= 2 (decode-visibility "2SM")))
+    (is (= 30 (decode-visibility "30SM")))
+    (is (= 1/4 (decode-visibility "1/4SM")))))
+
+(deftest weather-test
+  (testing "Simple"
+    (is (= "Mist" (decode-weather "BR")))
+    (is (= "Hail" (decode-weather "GR"))))
+  (testing "Modifiers"
+    (is (= "Heavy Spray" (decode-weather "+PY")))
+    (is (= "Light Snow" (decode-weather "-SN")))))
+
 (deftest metar-test
   (testing metar-simple
     (let [metar (decode-metar metar-simple)]

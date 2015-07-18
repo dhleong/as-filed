@@ -7,6 +7,37 @@
              [format :as f]]))
 
 ;;
+;; Constants
+;;
+
+(def weather-types
+  {"BR" "Mist"
+   "FG" "Fog"
+   "DU" "Dust"
+   "HZ" "Haze"
+   "SA" "Sand"
+   "PY" "Spray"
+   "FU" "Smoke"
+   ;; "qualifiers"
+   "MI" "Shallow"
+   "BC" "Patches"
+   "BL" "Blowing"
+   "DR" "Low Drifting"
+   "SH" "Showers"
+   "TS" "Thunderstorms"
+   "FZ" "Freezing"
+   "PR" "Partial"
+   ;; precipitation
+   "DZ" "Drizzle"
+   "RA" "Rain"
+   "SN" "Snow"
+   "SG" "Snow Grains"
+   "IC" "Ice Crystals"
+   "PL" "Ice Pellets"
+   "GR" "Hail"
+   "GS" "Small Hail/Snow Pellets"})
+
+;;
 ;; Utils
 ;;
 
@@ -17,6 +48,19 @@
     (Integer/parseInt raw)
     (catch NumberFormatException e
       raw)))
+
+(defn- as-number
+  "Best-effort conversion to a (possibly fractional) number"
+  [raw]
+  (if (.contains raw "/")
+    (let [[numer denom] (split raw #"/")]
+      (/ (as-int numer) (as-int denom)))
+    ;; safe fallback
+    (as-int raw)))
+
+;;
+;; Decoder parts
+;;
 
 (defn decode-time
   [token]
@@ -41,9 +85,26 @@
      :dir-variable (if (last dir)
                      (map as-int (rest dir)))}))
 
+(defn decode-visibility
+  [token]
+  (-> token
+      (.substring 0 (- (count token) 2))
+      as-number))
+
+(defn decode-weather
+  [token]
+  (let [raw (->> token (take-last 2) (apply str))
+        desc (get weather-types raw)]
+    (case (first token)
+      \+ (str "Heavy " desc)
+      \- (str "Light " desc)
+      desc)))
+
 (def metar-parts
-  {:time [#"[0-9]Z" decode-time]
-   :wind [#"[0-9GVRB]+KT" decode-wind]})
+  {:time [#"[0-9]+Z" decode-time]
+   :wind [#"[0-9GVRB]+KT" decode-wind]
+   :visibility [#"[0-9/]+SM" decode-visibility]
+   :weather [#"(+|-)?[A-Z]{2}" decode-weather]})
 
 
 ;;
