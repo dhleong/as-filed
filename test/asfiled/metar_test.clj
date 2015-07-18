@@ -8,7 +8,7 @@
   "KLGA 171951Z 17017G22KT 10SM FEW050 SCT160 BKN230 26/14 A3005 RMK AO2 SLP176 T02610144")
 
 (def metar-rvrs
-  "KLGA 171951Z 17017G22KT 4SM R22L/3000M2500FT +RA SCT160 BKN230 26/14 A3005 RMK AO2 SLP176 T02610144")
+  "KLGA 171951Z 17017G22KT 4SM R22L/3000M2500FT +RA BKN230 26/14 A3005 RMK AO2 SLP176 T02610144")
 
 (defn eq-by-key
   [a b]
@@ -128,5 +128,7 @@
                                    :to 2500
                                    :as :less-than}}
                      (:rvr metar)))
-      (is (= "Heavy Rain" (:weather metar)))
-      (is (= 2 (-> metar :sky count))))))
+      (is (vector? (-> metar :weather)))
+      (is (= "Heavy Rain" (-> metar :weather first)))
+      (is (vector? (-> metar :sky)))
+      (is (= 1 (-> metar :sky count))))))

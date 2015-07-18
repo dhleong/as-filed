@@ -50,6 +50,10 @@
    "OVC" :overcast
    "FEW" :few})
 
+;; these types should always be wrapped in a vector
+(def always-vector-types
+  #{:sky :weather})
+
 ;;
 ;; Utils
 ;;
@@ -216,6 +220,9 @@
                  (not (nil? existing)) (assoc result
                                               part-type
                                               [existing part])
+                 ;; no existing value
+                 (-> always-vector-types (contains? part-type))
+                 (assoc result part-type [part])
                  ;; no existing value
                  :else (assoc result part-type part)
                  )))
