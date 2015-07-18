@@ -90,9 +90,11 @@
         (println "  - Valid exits:" exit-points)))
     ;; filed route, if we have it
     (when-let [route (-> client :route)]
-      (println "* Filed route:\n  -" route)
+      (println "  * On filed route:\n    -" route)
       (when-let [cruise (-> client :cruise)]
-        (println "  - Cruise at:" cruise)))
+        (println "    - Cruise at:" cruise))
+      (doseq [[amend-from amend-to] (:amendments data)]
+        (println "    ! Possible Amendment:" amend-from " -> " amend-to)))
     (when-let [remarks (-> client :remarks)]
       (println "* Remarks:\n  -" remarks))
     ;; prefered routes

@@ -10,7 +10,7 @@
              [nyartcc-sop :refer [get-sop]]
              [sink :as snk :refer [Sink]]
              [skyvector :refer [get-bearing-to get-exit-to]]
-             [sop-util :refer [select-runways select-sid]]]))
+             [sop-util :refer [select-runways select-sid get-common-amendments]]]))
 
 (def url-ais "http://nyartcc.org/aacisa")
 (def url-prd "http://nyartcc.org/prd/ajax.php")
@@ -117,7 +117,10 @@
       (select-runways sop weather)))
   (get-sid [this tags] 
     (when-let [sop (get-sop my-icao)]
-      (select-sid sop tags))))
+      (select-sid sop tags)))
+  (get-amendments [this route] 
+    (when-let [sop (get-sop my-icao)]
+      (get-common-amendments sop route))))
 
 (defn create-sink 
   "Instantiate a nyartcc-based Sink"

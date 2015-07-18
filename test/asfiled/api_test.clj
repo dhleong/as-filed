@@ -27,7 +27,10 @@
     (get-valid-exits [this to]
       {:bearing 238
        :gate :west
-       :exits ["LANNA"]})))
+       :exits ["LANNA"]})
+    (get-amendments [this route]
+      ;; none
+      nil)))
 
 (def client
   {:callsign "BAW123"

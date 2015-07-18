@@ -139,8 +139,11 @@
                            sink 
                            (:depart client)
                            (:arrive client))
-        equip (equipment-type client)]
+        equip (equipment-type client)
+        amendments (if-let [route (:route client)]
+                     (snk/get-amendments sink route))]
     {:airline @airline
+     :amendments amendments
      :craft @craft
      :exits @exits
      :preferred-routes @preferred-routes
