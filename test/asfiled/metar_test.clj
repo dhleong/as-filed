@@ -65,6 +65,19 @@
     (is (= "Heavy Thunderstorms with Hail" (decode-weather "+TSGR")))
     (is (= "Light Freezing Rain" (decode-weather "-FZRA")))))
 
+(deftest sky-test
+  (testing "Clear"
+    (is (eq-by-key {:type :clear} (decode-sky "SKC")))
+    (is (eq-by-key {:type :clear} (decode-sky "CLR"))))
+  (testing "Ceiling"
+    (is (eq-by-key {:type :indefinite :ceiling 2000} (decode-sky "VV020")))
+    (is (eq-by-key {:type :few :ceiling 700} (decode-sky "FEW007"))))
+  (testing "With Clouds"
+    (is (= {:type :overcast :ceiling 2000 :clouds :cumulonimbus}
+           (decode-sky "OVC020CB")))
+    (is (= {:type :scattered :ceiling 700 :clouds :towering-cumulus}
+           (decode-sky "SCT007TCU")))))
+
 (deftest metar-test
   (testing metar-simple
     (let [metar (decode-metar metar-simple)]

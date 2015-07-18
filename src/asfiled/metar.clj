@@ -44,6 +44,12 @@
    "FC" "Funnel Cloud/Tornado/Waterspout"
    "SS" "Sandstorm/Duststorm"})
 
+(def sky-conditions
+  {"SCT" :scattered
+   "BKN" :broken
+   "OVC" :overcast
+   "FEW" :few})
+
 ;;
 ;; Utils
 ;;
@@ -64,6 +70,11 @@
       (/ (as-int numer) (as-int denom)))
     ;; safe fallback
     (as-int raw)))
+
+(defn- as-feet
+  "Best-effort conversion from flight level to feet"
+  [raw]
+  (-> raw as-int (* 100)))
 
 ;;
 ;; Decoder parts
@@ -112,11 +123,31 @@
       \- (str "Light " desc-with-mod)
       desc-with-mod)))
 
+(defn decode-sky
+  [token]
+  (let [base (-> token (.replaceAll "(CB|TCU|ACC)$", ""))
+        clouds
+        (cond 
+          (-> token (.endsWith "CB")) :cumulonimbus
+          (-> token (.endsWith "TCU")) :towering-cumulus
+          (-> token (.endsWith "ACC")) :altocumulus-castellanus
+          :else nil)]
+    (merge 
+      {:clouds clouds} 
+      (cond
+        (= "SKC" base) {:type :clear}
+        (= "CLR" base) {:type :clear}
+        (-> token (.startsWith "VV")) {:type :indefinite 
+                                       :ceiling (-> base (.substring 2) as-feet)}
+        :else {:type (get sky-conditions (-> base (.substring 0 3)))
+               :ceiling (-> base (.substring 3) as-feet)}))))
+
 (def metar-parts
   {:time [#"[0-9]+Z" decode-time]
    :wind [#"[0-9GVRB]+KT" decode-wind]
    :visibility [#"[0-9/]+SM" decode-visibility]
-   :weather [#"(+|-)?[A-Z]{2,4}" decode-weather]})
+   :weather [#"(+|-)?[A-Z]{2,4}" decode-weather]
+   :sky [#"(SKC|CLR|[A-Z]{2,3}[0-9]{3})([TCUBA]{2,3})?" decode-sky]})
 
 
 ;;
