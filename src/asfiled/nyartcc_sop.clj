@@ -65,7 +65,59 @@
   {:any [:jfk-land-4 :jfk-land-dme22l :jfk-land-vis22l]})
 
 (def sop-klga
-  {:exit-intervals
+  {:common-ammendments
+   {;; airways
+    "L454" "WAVEY OWENZ L454"
+    "L455" "WAVEY OWENZ L455"
+    "L457" "WAVEY OWENZ L457"
+    "L459" "WAVEY OWENZ L459"
+    "J6" "PARKE J6"
+    "J37" "GREKI ALB J37"
+    "J42" "MERIT HFD J42"
+    "J48" "LANNA J48"
+    "J60" "NEWEL J60"
+    "J63" "HAAYS HUO Q812"
+    "J64" "NEWEL J60 DANNR RAV J64"
+    "J70" "SAX LVZ J70"
+    "J75" "North: GREKI J75; South: BIGGY J75"
+    "J79" "East: BDR HOFFI J79; South: WHITE J209 VILLS J79"
+    "J95" "GAYEL J95"
+    "J106" "SAX LVZ J106"
+    "J146" "PARKE FJC J146"
+    "J174" "WAVEY EMJAY J174"
+    "J209" "WHITE J209"
+    "J222" "North: GREKI J222; South: (next airway)"
+    "J223" "NEION J223"
+    "J225" "BDR RAALF J225"
+    "J584" "SAX LVZ FQM J584"
+    "Q42" "ZIMMZ Q42"
+    "Q436" "COATE Q436"
+    "Q480" "ZIMMZ SPOTZ Q480"
+    ;; filed exits
+    "ARD" "BIGGY"
+    "BOUND" "WAVEY"
+    "CCC" "DPK"
+    "COL" "WHITE"
+    "ETX" "PARKE"
+    "FJC" "PARKE"
+    "GEDIC" "WAVEY GEDIC"
+    "HFD" "MERIT HFD"
+    "HOFFI" "BDR HOFFI"
+    "HTO" "BDR HOFFI HTO"
+    "HUO" "HAAYS"
+    "IGN" "GREKI"
+    "JOANI" "WHITE"
+    "LAURN" "WHITE"
+    "MARIO" "MERIT"
+    "NEWES" "MERIT"
+    "OWENZ" "WAVEY OWENZ"
+    "PACER" "MERIT"
+    "PNE" "BIGGY PNE"
+    "PUT" "MERIT"
+    "RAALF" "MERIT"
+    "RBV" "West: BIGGY; South: WHITE"
+    "STW" "SAX"}
+   :exit-intervals
    {:north [[290 360] [0 15]]
     :east [[16 95]]
     :south [[96 215]]
@@ -135,54 +187,54 @@
       ]
      ;; merge with JFK to get its tags
      sop-runways-kjfk)
-   :sid-selection
-   [{:when [:lga-depart-13 lga-land-catchall
-            :jfk-depart-13 :jfk-land-ils13]
-     :use "(All Types) (All Gates) [FLUSHING] [TNNIS#]"}
-    {:when [:lga-depart-13 lga-land-catchall
-            :jfk-depart-13 :jfk-land-ils22]
-     :use "(All Types) (All Gates) [FLUSHING] [TNNIS#]"}
-    {:when [:lga-depart-13 lga-land-catchall
-            :jfk-depart-13 :jfk-land-vor13]
-     :use "(All Types) (All Gates) [WHITESTONE] [TNNIS#]"}
-    {:when [:lga-depart-13 lga-land-catchall
-            :jfk-depart-31 :jfk-land-ils22]
-     :use "(All Types) (All Gates) [FLUSHING] [TNNIS#]"}
-    {:when [:lga-depart-13 lga-land-catchall
-            :jfk-depart-31 {:not [:jfk-land-ils22]}]
-     :use "(All Types) (All Gates) [WHITESTONE] [TNNIS#]"}
-    {:when [:lga-depart-13 lga-land-catchall
-            :jfk-depart-22r {:any [:jfk-land-ils22 :jfk-land-22]}]
-     :use (join "\n"
-                ["JETS (South Gates) [CONEY]      [NTHNS#]"
-                 "JETS (W/N/E Gates) [MASPETH]    [GLDMN#]"
-                 "PROP (All Gates)   [FLUSHING**] [TNNIS#]"])}
-    {:when [:lga-depart-13 :lga-land-22
-            jfk-depart-catchall jfk-land-catchall]
-     :use (join "\n"
-                ["JETS (South Gates) [CONEY]      [NTHNS#]"
-                 "JETS (W/N   Gates) [MASPETH]    [GLDMN#]"
-                 "JETS (East  Gates) [WHITESTONE] [TNNIS#]"
-                 "PROP (All Gates)   [WHITESTONE] [TNNIS#]"])}
-    {:when [:lga-depart-13 {:not [:lga-land-22]}
-            jfk-depart-catchall jfk-land-catchall]
-     :use (join "\n"
-                ["JETS (South Gates) [CONEY]      [NTHNS#]"
-                 "JETS (W/N/E Gates) [WHITESTONE] [TNNIS#]"
-                 "PROP (All Gates)   [WHITESTONE] [TNNIS#]"])}
-    {:when [:lga-depart-22 :lga-land-22
-            :jfk-depart-31 :jfk-land-31]
-     :use "(All Types) (All Gates) [As Published] [JUTES#]"}
-    {:when [:lga-depart-22 :lga-land-22
-            {:not [:jfk-depart-31]} :jfk-land-13]
-     :use "(All Types) (All Gates) [As Published] [JUTES#]"}
-    {:when [:lga-depart-22 :lga-land-22
-            {:not [:jfk-depart-31]} {:any [:jfk-land-4 :jfk-land-22]}]
-     :use (join "\n"
-                ["ALL  (W/N/E Gates) [As Published] [JUTES#]"
-                 "JETS (South Gates) [Follow  RNAV] [HOPEA#]"])}
-    ]
-   })
+:sid-selection
+[{:when [:lga-depart-13 lga-land-catchall
+         :jfk-depart-13 :jfk-land-ils13]
+  :use "(All Types) (All Gates) [FLUSHING] [TNNIS#]"}
+ {:when [:lga-depart-13 lga-land-catchall
+         :jfk-depart-13 :jfk-land-ils22]
+  :use "(All Types) (All Gates) [FLUSHING] [TNNIS#]"}
+ {:when [:lga-depart-13 lga-land-catchall
+         :jfk-depart-13 :jfk-land-vor13]
+  :use "(All Types) (All Gates) [WHITESTONE] [TNNIS#]"}
+ {:when [:lga-depart-13 lga-land-catchall
+         :jfk-depart-31 :jfk-land-ils22]
+  :use "(All Types) (All Gates) [FLUSHING] [TNNIS#]"}
+ {:when [:lga-depart-13 lga-land-catchall
+         :jfk-depart-31 {:not [:jfk-land-ils22]}]
+  :use "(All Types) (All Gates) [WHITESTONE] [TNNIS#]"}
+ {:when [:lga-depart-13 lga-land-catchall
+         :jfk-depart-22r {:any [:jfk-land-ils22 :jfk-land-22]}]
+  :use (join "\n"
+             ["JETS (South Gates) [CONEY]      [NTHNS#]"
+              "JETS (W/N/E Gates) [MASPETH]    [GLDMN#]"
+              "PROP (All Gates)   [FLUSHING**] [TNNIS#]"])}
+ {:when [:lga-depart-13 :lga-land-22
+         jfk-depart-catchall jfk-land-catchall]
+  :use (join "\n"
+             ["JETS (South Gates) [CONEY]      [NTHNS#]"
+              "JETS (W/N   Gates) [MASPETH]    [GLDMN#]"
+              "JETS (East  Gates) [WHITESTONE] [TNNIS#]"
+              "PROP (All Gates)   [WHITESTONE] [TNNIS#]"])}
+ {:when [:lga-depart-13 {:not [:lga-land-22]}
+         jfk-depart-catchall jfk-land-catchall]
+  :use (join "\n"
+             ["JETS (South Gates) [CONEY]      [NTHNS#]"
+              "JETS (W/N/E Gates) [WHITESTONE] [TNNIS#]"
+              "PROP (All Gates)   [WHITESTONE] [TNNIS#]"])}
+ {:when [:lga-depart-22 :lga-land-22
+         :jfk-depart-31 :jfk-land-31]
+  :use "(All Types) (All Gates) [As Published] [JUTES#]"}
+ {:when [:lga-depart-22 :lga-land-22
+         {:not [:jfk-depart-31]} :jfk-land-13]
+  :use "(All Types) (All Gates) [As Published] [JUTES#]"}
+ {:when [:lga-depart-22 :lga-land-22
+         {:not [:jfk-depart-31]} {:any [:jfk-land-4 :jfk-land-22]}]
+  :use (join "\n"
+             ["ALL  (W/N/E Gates) [As Published] [JUTES#]"
+              "JETS (South Gates) [Follow  RNAV] [HOPEA#]"])}
+ ]
+})
 
 ;; NB: For runway selection, we examine ALL options
 ;;  and evaluate ALL matches. This means we merge

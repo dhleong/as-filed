@@ -48,6 +48,28 @@
     (when (= (count tags) (count tag-descriptor))
       (every? true? (map #(match-tag %1 %2) tags tag-descriptor)))))
 
+(defn get-common-amendments
+  "Given a route and an SOP with common amendments,
+  return a list of [point amendment] pairs of common
+  amendments that may be applicable for that route.
+  Returns an empty sequence if there were no matches"
+  [sop route]
+  (when-let [amends (:common-ammendments sop)]
+    (let [parts (re-seq #"\w+" route)
+          part1 (first parts)
+          part2 (second parts)
+          part3 (nth parts 2 nil)]
+      (->> [[part1 (get amends part1)]
+            [part2 (get amends part2)]
+            [part3 (get amends part3)]]
+           (filter 
+             (fn [[_ amend]] 
+               (and
+                 ;; filter out non-existing entries...
+                 amend
+                 ;; and unnecessary ones
+                 (= -1 (-> route (.indexOf amend))))))))))
+
 (defn select-runways
   "Given weather conditions and an SOP,
   figure out what runway configuration

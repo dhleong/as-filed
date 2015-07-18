@@ -6,6 +6,21 @@
 
 (def weather-calm {:speed 2 :dir 140})
 
+(deftest get-common-amendments-test
+  (testing "Single item route"
+    (is (empty? (get-common-amendments sop-klga "BDR")))
+    (is (= [["PUT" "MERIT"]]
+           (get-common-amendments sop-klga "PUT"))))
+  (testing "Route with departure"
+    (is (= [["J6" "PARKE J6"]]
+           (get-common-amendments sop-klga "LGA5 J6")))
+    (is (empty?
+          ;; don't include an amendment if they're doing it right
+          (get-common-amendments sop-klga "LGA5 WHITE J209"))))
+  (testing "Extras"
+    (is (= [["ARD" "BIGGY"]]
+           (get-common-amendments sop-klga "N0450F380 LGA5 ARD")))))
+
 (deftest match-runway-test
   (testing "JFK matching, no RVR"
     (let [weather {:speed 14 :dir 190}]
