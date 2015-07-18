@@ -88,6 +88,13 @@
         (println "  - Bearing" (:bearing exits)))
       (if-let [exit-points (:exits exits)]
         (println "  - Valid exits:" exit-points)))
+    ;; filed route, if we have it
+    (when-let [route (-> client :route)]
+      (println "* Filed route:\n  -" route)
+      (when-let [cruise (-> client :cruise)]
+        (println "  - Cruise at:" cruise)))
+    (when-let [remarks (-> client :remarks)]
+      (println "* Remarks:\n  -" remarks))
     ;; prefered routes
     (when-let [routes (seq (-> data :preferred-routes))]
       (println "* PREFERRED ROUTES FROM" (upper-case local))
