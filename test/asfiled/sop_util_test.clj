@@ -7,14 +7,25 @@
 (def weather-calm {:speed 2 :dir 140})
 
 (deftest match-runway-test
-  (testing "JFK matching"
+  (testing "JFK matching, no RVR"
     (let [weather {:speed 14 :dir 190}]
       (is (not (match-runway 
                     weather 
                     (-> sop-runways-kjfk (nth 0))))) ;; 0-4 @ ANY
       (is (not (match-runway 
                     weather 
-                    (-> sop-runways-kjfk (nth 1)))))))) ;; 5+ @ 0-99
+                    (-> sop-runways-kjfk (nth 1)))))))
+  (testing "JFK matching, with RVR"
+    (let [weather {:speed 14 :dir 90 :rvr 1400}]
+      (is (not (match-runway 
+                    weather 
+                    (-> sop-runways-kjfk (nth 0))))) ;; 0-4 @ ANY
+      (is (not (match-runway 
+                    weather 
+                    (-> sop-runways-kjfk (nth 1)))))
+      (is (match-runway 
+            weather 
+            (-> sop-runways-kjfk (nth 5))))))) ;; matches RVR
 
 (deftest select-runways-test
   (testing "calm winds"

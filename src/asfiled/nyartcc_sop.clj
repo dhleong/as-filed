@@ -20,6 +20,41 @@
    {:when {:speed [5 999] :dir [[260 359]]}
     :use "JFK: Depart: 31L/R  Land: 31L/R"
     :tags [:jfk-depart-31 :jfk-land-31]}
+   ; RVR 1200-1800
+   {:when {:speed [0 999] :rvr [1200 1800] :dir [[0 99]]}
+    :use "JFK: Depart: 4L  Land: 4R"
+    :tags [:jfk-depart-4 :jfk-land-4]}
+   {:when {:speed [0 999] :rvr [1200 1800] :dir [[100 159]]}
+    :use "JFK: Depart: 13R  Land: 13L"
+    :tags [:jfk-depart-13 :jfk-land-13]}
+   {:when {:speed [0 999] :rvr [1200 1800] :dir [[160 259]]}
+    :use "JFK: Depart: 22R  Land: 22L"
+    :tags [:jfk-depart-22r :jfk-land-22]}
+   {:when {:speed [0 999] :rvr [1200 1800] :dir [[260 309]]}
+    :use "JFK: Depart: 31L  Land: 22L"
+    :tags [:jfk-depart-31 :jfk-land-22]}
+   {:when {:speed [0 999] :rvr [1200 1800] :dir [[310 359]]}
+    :use "JFK: Depart: 31L  Land: 4R"
+    :tags [:jfk-depart-31 :jfk-land-4]}
+   ; RVR 0-1200
+   {:when {:speed [0 999] :rvr [0 1200] :dir [[0 99]]}
+    :use "JFK: Depart: 4L  Land: 4R"
+    :tags [:jfk-depart-4 :jfk-land-4]}
+   {:when {:speed [0 999] :rvr [0 1200] :dir [[100 129]]}
+    :use "JFK: Depart: 13R  Land: 4R"
+    :tags [:jfk-depart-13 :jfk-land-4]}
+   {:when {:speed [0 999] :rvr [0 1200] :dir [[130 159]]}
+    :use "JFK: Depart: 13R  Land: 22L"
+    :tags [:jfk-depart-13 :jfk-land-22]}
+   {:when {:speed [0 999] :rvr [0 1200] :dir [[160 259]]}
+    :use "JFK: Depart: 22R  Land: 22L"
+    :tags [:jfk-depart-22r :jfk-land-22]}
+   {:when {:speed [0 999] :rvr [0 1200] :dir [[260 309]]}
+    :use "JFK: Depart: 31L  Land: 22L"
+    :tags [:jfk-depart-31 :jfk-land-22]}
+   {:when {:speed [0 999] :rvr [0 1200] :dir [[310 359]]}
+    :use "JFK: Depart: 31L  Land: 4R"
+    :tags [:jfk-depart-31 :jfk-land-4]}
    ])
 
 (def lga-land-catchall
@@ -27,7 +62,7 @@
 (def jfk-depart-catchall
   {:any [:jfk-depart-22r :jfk-depart-13 :jfk-depart-4l]})
 (def jfk-land-catchall
-  {:any [:jfk-land-4 :jfk-land-dme22l :jfk-land-22l]})
+  {:any [:jfk-land-4 :jfk-land-dme22l :jfk-land-vis22l]})
 
 (def sop-klga
   {:exit-intervals
@@ -45,6 +80,7 @@
      [{:when {:speed [0 4] :dir [[0 360]]}
        :use "LGA: Depart: 31  Land: VMC 22, IMC ILS22"
        :tags [:lga-depart-31 :lga-land-22]}
+      ; 5-14 KT
       {:when {:speed [5 14] :dir [[315 360] [0 44]]}
        :use "LGA: Depart: 4  Land: VMC EXP31, IMC LOC31"
        :tags [:lga-depart-4 :lga-land-31]}
@@ -56,6 +92,45 @@
        :tags [:lga-depart-13 :lga-land-22]}
       {:when {:speed [5 14] :dir [[260 314]]}
        :use "LGA: Depart: 31  Land: VMC 22, IMC ILS22"
+       :tags [:lga-depart-31 :lga-land-22]}
+      ; 15-25 KT
+      {:when {:speed [15 25] :dir [[315 360] [0 44]]}
+       :use "LGA: Depart: 4  Land: VMC LOC31, IMC LOC31"
+       :tags [:lga-depart-4 :lga-land-31]}
+      {:when {:speed [15 25] :dir [[45 134]]}
+       :use "LGA: Depart: 13  Land: VMC ILS4, IMC ILS4"
+       :tags [:lga-depart-13 :lga-land-4]}
+      {:when {:speed [15 25] :dir [[135 222]]}
+       :use "LGA: Depart: 13  Land: ILS22"
+       :tags [:lga-depart-13 :lga-land-22]}
+      {:when {:speed [15 25] :dir [[225 314]]}
+       :use "LGA: Depart: 31  Land: ILS22"
+       :tags [:lga-depart-31 :lga-land-22]}
+      ; 25+ KT
+      {:when {:speed [25 999] :dir [[0 89]]}
+       :use "LGA: Depart: 4  Land: VMC ILS4, IMC ILS4"
+       :tags [:lga-depart-4 :lga-land-4]}
+      {:when {:speed [25 999] :dir [[90 179]]}
+       :use "LGA: Depart: 13  Land: VMC ILS22 CIR13, IMC ILS13"
+       :tags [:lga-depart-13 :lga-land-13]}
+      {:when {:speed [25 999] :dir [[180 269]]}
+       :use "LGA: Depart: 22  Land: ILS22"
+       :tags [:lga-depart-22 :lga-land-22]}
+      {:when {:speed [25 999] :dir [[270 359]]}
+       :use "LGA: Depart: 31  Land: LOC31"
+       :tags [:lga-depart-31 :lga-land-31]}
+      ; RVR 1200-2400
+      {:when {:speed [0 999] :rvr [1200 2400] :dir [[315 360] [0 44]]}
+       :use "LGA: Depart: 31  Land: ILS 22"
+       :tags [:lga-depart-31 :lga-land-22]}
+      {:when {:speed [0 999] :rvr [1200 2400] :dir [[045 134]]}
+       :use "LGA: Depart: 13  Land: ILS 22"
+       :tags [:lga-depart-13 :lga-land-22]}
+      {:when {:speed [0 999] :rvr [1200 2400] :dir [[135 224]]}
+       :use "LGA: Depart: 13  Land: ILS22"
+       :tags [:lga-depart-13 :lga-land-22]}
+      {:when {:speed [0 999] :rvr [1200 2400] :dir [[225 314]]}
+       :use "LGA: Depart: 31  Land: ILS22"
        :tags [:lga-depart-31 :lga-land-22]}
       ]
      ;; merge with JFK to get its tags

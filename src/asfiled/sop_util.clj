@@ -23,7 +23,10 @@
         ;; eg: both nil
         (= (:rvr weather) (:rvr runway))
         ;; rvr range
-        (within-range (:rvr weather) (:rvr runway))))))
+        (and
+          (not (nil? (:rvr runway)))
+          (not (nil? (:rvr weather)))
+          (within-range (:rvr weather) (:rvr runway)))))))
 
 (defn- has-tag
   [vect tag]
