@@ -48,6 +48,15 @@
       {:when {:speed [5 14] :dir [[315 360] [0 44]]}
        :use "LGA: Depart: 4  Land: VMC EXP31, IMC LOC31"
        :tags [:lga-depart-4 :lga-land-31]}
+      {:when {:speed [5 14] :dir [[45 134]]}
+       :use "LGA: Depart: 13  Land: VMC 4, IMC ILS4"
+       :tags [:lga-depart-13 :lga-land-4]}
+      {:when {:speed [5 14] :dir [[135 259]]}
+       :use "LGA: Depart: 13  Land: VMC 22, IMC ILS22"
+       :tags [:lga-depart-13 :lga-land-22]}
+      {:when {:speed [5 14] :dir [[260 314]]}
+       :use "LGA: Depart: 31  Land: VMC 22, IMC ILS22"
+       :tags [:lga-depart-31 :lga-land-22]}
       ]
      ;; merge with JFK to get its tags
      sop-runways-kjfk)
@@ -68,9 +77,9 @@
             :jfk-depart-31 {:not [:jfk-land-ils22]}]
      :use "(All Types) (All Gates) [WHITESTONE] [TNNIS#]"}
     {:when [:lga-depart-13 lga-land-catchall
-            :jfk-depart-22r :jfk-land-ils22]
+            :jfk-depart-22r {:any [:jfk-land-ils22 :jfk-land-22]}]
      :use (join "\n"
-                ["JETS (South Gates) [WHITESTONE] [NTHNS#]"
+                ["JETS (South Gates) [CONEY]      [NTHNS#]"
                  "JETS (W/N/E Gates) [MASPETH]    [GLDMN#]"
                  "PROP (All Gates)   [FLUSHING**] [TNNIS#]"])}
     {:when [:lga-depart-13 :lga-land-22

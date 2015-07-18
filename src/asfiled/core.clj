@@ -148,16 +148,28 @@
   [sink input]
   (let [parts (split input #" +")
         local (snk/get-facility sink)]
-    (when-let [raw-metar (cond 
-                  (= 2 (count parts)) (-> parts second upper-case load-metar)
-                  (string? local) (load-metar local)
-                  :else (println "Local facility not known"))]
+    (when-let [raw-metar 
+               (cond 
+                 (= 2 (count parts)) (-> parts second upper-case load-metar)
+                 (string? local) (load-metar local)
+                 :else (println "Local facility not known"))]
       (println raw-metar)
       (let [metar (decode-metar raw-metar)
             weather (:weather metar)]
         (println "* Min Flight Level:" (:min-flight-level metar))
         (if (seq weather)
-          (println "* " (join ";" weather)))))))
+          (println "* Weather:" (join ";" weather)))
+        (when-let [runways (snk/get-runways 
+                           sink 
+                           {:speed (-> metar :wind :speed)
+                            :dir (-> metar :wind :dir)
+                            :rvr (-> metar :rvr :visibility :from)})]
+          (println "* Runways in use:" (:tags runways))
+          (println "  -" (-> runways :runways (.replace "\n", "\n  - ")))
+          (when-let [sid (snk/get-sid sink (:tags runways))]
+            (def runway-config sid)
+            (println "* SID Selection:")
+            (format-config sid)))))))
 
 (defn- cli-runways
   [sink input]

@@ -14,9 +14,10 @@
       ;; speed 
       (within-range (:speed weather) (:speed runway))
       ;; direction
-      (filter 
-        #(within-range (:dir weather) %)
-        (:dir runway))
+      (seq 
+        (filter 
+          #(within-range (:dir weather) %)
+          (:dir runway)))
       ;; rvr
       (or
         ;; eg: both nil

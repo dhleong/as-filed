@@ -2,9 +2,19 @@
   (:require [clojure.test :refer :all]
             [asfiled
              [sop-util :refer :all]
-             [nyartcc-sop :refer [sop-klga]]]))
+             [nyartcc-sop :refer [sop-klga sop-runways-kjfk]]]))
 
 (def weather-calm {:speed 2 :dir 140})
+
+(deftest match-runway-test
+  (testing "JFK matching"
+    (let [weather {:speed 14 :dir 190}]
+      (is (not (match-runway 
+                    weather 
+                    (-> sop-runways-kjfk (nth 0))))) ;; 0-4 @ ANY
+      (is (not (match-runway 
+                    weather 
+                    (-> sop-runways-kjfk (nth 1)))))))) ;; 5+ @ 0-99
 
 (deftest select-runways-test
   (testing "calm winds"
