@@ -78,6 +78,14 @@
     (is (= {:type :scattered :ceiling 700 :clouds :towering-cumulus}
            (decode-sky "SCT007TCU")))))
 
+(deftest temperature-test
+  (testing "Positive"
+    (is (= {:temperature 20 :dewpoint 18} 
+           (decode-temperature "20/18"))))
+  (testing "Negative"
+    (is (= {:temperature -20 :dewpoint -18} 
+           (decode-temperature "M20/M18")))))
+
 (deftest metar-test
   (testing metar-simple
     (let [metar (decode-metar metar-simple)]

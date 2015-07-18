@@ -142,12 +142,19 @@
         :else {:type (get sky-conditions (-> base (.substring 0 3)))
                :ceiling (-> base (.substring 3) as-feet)}))))
 
+(defn decode-temperature
+  [token]
+  (let [parts (-> token (.replace "M" "-") (split #"/"))]
+    {:temperature (-> parts first as-int)
+     :dewpoint (-> parts second as-int)}))
+
 (def metar-parts
   {:time [#"[0-9]+Z" decode-time]
    :wind [#"[0-9GVRB]+KT" decode-wind]
    :visibility [#"[0-9/]+SM" decode-visibility]
    :weather [#"(+|-)?[A-Z]{2,4}" decode-weather]
-   :sky [#"(SKC|CLR|[A-Z]{2,3}[0-9]{3})([TCUBA]{2,3})?" decode-sky]})
+   :sky [#"(SKC|CLR|[A-Z]{2,3}[0-9]{3})([TCUBA]{2,3})?" decode-sky]
+   :temperature [#"M?[0-9]{2}/M?[0-9]{2}"]})
 
 
 ;;
