@@ -32,6 +32,17 @@
   [vect tag]
   (some #(= % tag) vect))
 
+(defn format-sids
+  [sop sid]
+  (if-let [numbers (:departure-numbers sop)]
+    (reduce 
+      (fn [result [proc number]]
+        (-> result (.replace (str proc "#") (str proc number))))
+      sid
+      numbers)
+    ;; nope; just be normal
+    sid))
+
 (defn match-tag
   [tag tag-descriptor]
   (if (map? tag-descriptor)
@@ -91,4 +102,7 @@
   [sop tags]
   (when-let [sids (:sid-selection sop)]
     (when-let [matched (filter #(match-sid tags %) sids)]
-      (join "\n\n" (map :use matched)))))
+      (join "\n\n" 
+            (map 
+              #(->> % :use (format-sids sop))
+              matched)))))
