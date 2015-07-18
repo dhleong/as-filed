@@ -8,7 +8,7 @@
   "KLGA 171951Z 17017G22KT 10SM FEW050 SCT160 BKN230 26/14 A3005 RMK AO2 SLP176 T02610144")
 
 (def metar-rvrs
-  "KLGA 171951Z 17017G22KT 4SM R22L/3000M2500FT +RA BKN230 26/14 A3005 RMK AO2 SLP176 T02610144")
+  "KLGA 171951Z 17017G22KT 4SM R22L/3000M2500FT +RA BKN230 26/14 A2991 RMK AO2 SLP176 T02610144")
 
 (defn eq-by-key
   [a b]
@@ -119,7 +119,8 @@
       (is (eq-by-key {:type :few :ceiling 5000} (-> metar :sky first)))
       (is (= 26 (-> metar :temperature :value)))
       (is (= 14 (-> metar :temperature :dewpoint)))
-      (is (= 3005 (-> metar :altimeter)))))
+      (is (= 3005 (-> metar :altimeter)))
+      (is (= 180 (-> metar :min-flight-level)))))
   (testing metar-rvrs
     (let [metar (decode-metar metar-rvrs)]
       (is (not (nil? metar)))
@@ -131,4 +132,5 @@
       (is (vector? (-> metar :weather)))
       (is (= "Heavy Rain" (-> metar :weather first)))
       (is (vector? (-> metar :sky)))
-      (is (= 1 (-> metar :sky count))))))
+      (is (= 1 (-> metar :sky count)))
+      (is (= 190 (-> metar :min-flight-level))))))

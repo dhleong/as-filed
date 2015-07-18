@@ -80,6 +80,20 @@
   [raw]
   (-> raw as-int (* 100)))
 
+(defn- assign-min-fl
+  "Assign :min-flight-level based on :altimeter"
+  [metar]
+  (if-let [altimeter (:altimeter metar)]
+    (assoc metar 
+           :min-flight-level
+           (condp #(<= %1 %2) altimeter
+             2992 180
+             2892 190
+             2792 200
+             210)) ;; is this correct?
+    ;; no altimeter setting...!?
+    metar))
+
 ;;
 ;; Decoder parts
 ;;
@@ -226,4 +240,5 @@
                  ;; no existing value
                  :else (assoc result part-type part)
                  )))
-           {:icao icao})))) ;; initial result value
+           {:icao icao}) ;; initial result value
+         assign-min-fl))) ;; calculate the min FL for us :)
