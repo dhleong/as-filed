@@ -32,7 +32,12 @@
    ;
    "/V" {:nav "GNSS", :transponder :none}
    "/S" {:nav "GNSS", :transponder :no-mode-c}
-   "/G" {:nav "GNSS", :transponder :mode-c}})
+   "/G" {:nav "GNSS", :transponder :mode-c}
+   ; some legacy, just in case (I think we assume RVSM-capable)
+   "/E" {:rvsm true :nav "FMS (-> /L)" :transponder :mode-c}
+   "/F" {:rvsm true :nav "FMS (-> /L)" :transponder :mode-c}
+   "/K" {:rvsm true :nav "FMS (-> /L)" :transponder :mode-c}
+   })
 
 (def aircraft-type-regex #"(.{1,3}?/)?([^/]+)(/.+)?")
 (def aircraft-type-regex-offset 2)
