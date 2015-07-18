@@ -5,6 +5,7 @@
             [clojure.tools.nrepl.server :refer [start-server stop-server]]
             [asfiled
              [api :refer [analyze]]
+             [metar :refer [decode-metar]]
              [sink :as snk]
              [skyvector :refer [get-vor]]
              [nyartcc-sink :refer [create-sink]]
@@ -147,10 +148,16 @@
   [sink input]
   (let [parts (split input #" +")
         local (snk/get-facility sink)]
-    (cond 
-      (= 2 (count parts)) (-> parts second upper-case load-metar println)
-      (string? local) (println (load-metar local))
-      :else (println "Local facility not known"))))
+    (when-let [raw-metar (cond 
+                  (= 2 (count parts)) (-> parts second upper-case load-metar)
+                  (string? local) (load-metar local)
+                  :else (println "Local facility not known"))]
+      (println raw-metar)
+      (let [metar (decode-metar raw-metar)
+            weather (:weather metar)]
+        (println "* Min Flight Level:" (:min-flight-level metar))
+        (if (seq weather)
+          (println "* " (join ";" weather)))))))
 
 (defn- cli-runways
   [sink input]
