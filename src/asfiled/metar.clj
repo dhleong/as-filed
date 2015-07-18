@@ -11,20 +11,21 @@
 ;;
 
 (def weather-types
-  {"BR" "Mist"
+  {;; obscuration
+   "BR" "Mist"
    "FG" "Fog"
    "DU" "Dust"
    "HZ" "Haze"
    "SA" "Sand"
    "PY" "Spray"
    "FU" "Smoke"
-   ;; "qualifiers"
+   ;; "qualifiers"; we add some extra words for convenience
    "MI" "Shallow"
-   "BC" "Patches"
+   "BC" "Patches of"
    "BL" "Blowing"
    "DR" "Low Drifting"
-   "SH" "Showers"
-   "TS" "Thunderstorms"
+   "SH" "Showers of"
+   "TS" "Thunderstorms with"
    "FZ" "Freezing"
    "PR" "Partial"
    ;; precipitation
@@ -35,7 +36,13 @@
    "IC" "Ice Crystals"
    "PL" "Ice Pellets"
    "GR" "Hail"
-   "GS" "Small Hail/Snow Pellets"})
+   "GS" "Small Hail/Snow Pellets"
+   "UP" "Unknown Precipitation"
+   ;; others
+   "PO" "Well-Developed Dust/Sand Whirls"
+   "SQ" "Squalls"
+   "FC" "Funnel Cloud/Tornado/Waterspout"
+   "SS" "Sandstorm/Duststorm"})
 
 ;;
 ;; Utils
@@ -94,17 +101,22 @@
 (defn decode-weather
   [token]
   (let [raw (->> token (take-last 2) (apply str))
-        desc (get weather-types raw)]
+        modif (->> token (take-last 4) (take 2) (apply str))
+        desc (get weather-types raw)
+        desc-with-mod (let [modif-desc (get weather-types modif)]
+                        (if (and modif-desc (not= modif raw))
+                          (str modif-desc " " desc)
+                          desc))]
     (case (first token)
-      \+ (str "Heavy " desc)
-      \- (str "Light " desc)
-      desc)))
+      \+ (str "Heavy " desc-with-mod)
+      \- (str "Light " desc-with-mod)
+      desc-with-mod)))
 
 (def metar-parts
   {:time [#"[0-9]+Z" decode-time]
    :wind [#"[0-9GVRB]+KT" decode-wind]
    :visibility [#"[0-9/]+SM" decode-visibility]
-   :weather [#"(+|-)?[A-Z]{2}" decode-weather]})
+   :weather [#"(+|-)?[A-Z]{2,4}" decode-weather]})
 
 
 ;;

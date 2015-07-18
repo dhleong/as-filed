@@ -55,9 +55,15 @@
   (testing "Simple"
     (is (= "Mist" (decode-weather "BR")))
     (is (= "Hail" (decode-weather "GR"))))
-  (testing "Modifiers"
+  (testing "Intensity"
     (is (= "Heavy Spray" (decode-weather "+PY")))
-    (is (= "Light Snow" (decode-weather "-SN")))))
+    (is (= "Light Snow" (decode-weather "-SN"))))
+  (testing "Modifiers"
+    (is (= "Patches of Spray" (decode-weather "BCPY")))
+    (is (= "Showers of Snow" (decode-weather "SHSN"))))
+  (testing "All together now!"
+    (is (= "Heavy Thunderstorms with Hail" (decode-weather "+TSGR")))
+    (is (= "Light Freezing Rain" (decode-weather "-FZRA")))))
 
 (deftest metar-test
   (testing metar-simple
