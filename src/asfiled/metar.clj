@@ -148,13 +148,33 @@
     {:temperature (-> parts first as-int)
      :dewpoint (-> parts second as-int)}))
 
+(defn decode-altimeter
+  [token]
+  (->> token rest (apply str) as-int))
+
+(defn decode-rvr
+  [token]
+  (let [parts (-> token (split #"/"))
+        runway (->> parts first rest (apply str))
+        vis (->> parts second (drop-last 2) (apply str))
+        vis-parts (->> vis (re-find #"(\d+)([VMP])(\d+)"))]
+    {:runway runway
+     :visibility {:from (-> vis-parts second as-int)
+                  :to (-> vis-parts last as-int)
+                  :trans (case (nth vis-parts 2)
+                          "V" :variable
+                          "M" :less-than
+                          "P" :more-than)}}))
+
 (def metar-parts
   {:time [#"[0-9]+Z" decode-time]
    :wind [#"[0-9GVRB]+KT" decode-wind]
    :visibility [#"[0-9/]+SM" decode-visibility]
    :weather [#"(+|-)?[A-Z]{2,4}" decode-weather]
    :sky [#"(SKC|CLR|[A-Z]{2,3}[0-9]{3})([TCUBA]{2,3})?" decode-sky]
-   :temperature [#"M?[0-9]{2}/M?[0-9]{2}"]})
+   :temperature [#"M?[0-9]{2}/M?[0-9]{2}" decode-temperature]
+   :altimeter [#"A[0-9]{4}" decode-altimeter]
+   :rvr [#"R.*?/.*?FT" decode-rvr]})
 
 
 ;;

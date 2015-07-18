@@ -86,6 +86,25 @@
     (is (= {:temperature -20 :dewpoint -18} 
            (decode-temperature "M20/M18")))))
 
+(deftest altimeter-test
+  (testing "Altimeter"
+    (is (= 2992 (decode-altimeter "A2992")))))
+
+(deftest rvr-test
+  (testing "Variable"
+    (is (= {:runway "22" :visibility {:from 2000
+                                      :to 3500
+                                      :trans :variable}}
+           (decode-rvr "R22/2000V3500FT")))
+    (is (= {:runway "04R" :visibility {:from 2000
+                                       :to 3500
+                                       :trans :more-than}}
+           (decode-rvr "R04R/2000P3500FT")))
+    (is (= {:runway "22L" :visibility {:from 3000
+                                       :to 2500
+                                       :trans :less-than}}
+           (decode-rvr "R22L/3000M2500FT")))))
+
 (deftest metar-test
   (testing metar-simple
     (let [metar (decode-metar metar-simple)]
