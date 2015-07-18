@@ -145,7 +145,7 @@
 (defn decode-temperature
   [token]
   (let [parts (-> token (.replace "M" "-") (split #"/"))]
-    {:temperature (-> parts first as-int)
+    {:value (-> parts first as-int)
      :dewpoint (-> parts second as-int)}))
 
 (defn decode-altimeter
@@ -161,21 +161,30 @@
     {:runway runway
      :visibility {:from (-> vis-parts second as-int)
                   :to (-> vis-parts last as-int)
-                  :trans (case (nth vis-parts 2)
-                          "V" :variable
-                          "M" :less-than
-                          "P" :more-than)}}))
+                  :as (case (nth vis-parts 2)
+                           "V" :variable
+                           "M" :less-than
+                           "P" :more-than)}}))
 
 (def metar-parts
-  {:time [#"[0-9]+Z" decode-time]
-   :wind [#"[0-9GVRB]+KT" decode-wind]
-   :visibility [#"[0-9/]+SM" decode-visibility]
-   :weather [#"(+|-)?[A-Z]{2,4}" decode-weather]
+  {:time [#"^[0-9]+Z$" decode-time]
+   :wind [#"^[0-9GVRB]+KT$" decode-wind]
+   :visibility [#"[0-9/]+SM$" decode-visibility]
+   :weather [#"^(\+|-)?[A-Z]{2,4}$" decode-weather]
    :sky [#"(SKC|CLR|[A-Z]{2,3}[0-9]{3})([TCUBA]{2,3})?" decode-sky]
-   :temperature [#"M?[0-9]{2}/M?[0-9]{2}" decode-temperature]
-   :altimeter [#"A[0-9]{4}" decode-altimeter]
-   :rvr [#"R.*?/.*?FT" decode-rvr]})
+   :temperature [#"^M?[0-9]{2}/M?[0-9]{2}$" decode-temperature]
+   :altimeter [#"^A[0-9]{4}$" decode-altimeter]
+   :rvr [#"^R.*?/.*?FT$" decode-rvr]})
 
+
+(defn- decode-part
+  [token]
+  (some
+    (fn [[part-type [regex decoder]]]
+      (when (re-find regex token)
+        (when-let [decoded (decoder token)]
+          {part-type decoded})))
+    metar-parts))
 
 ;;
 ;; Public API
@@ -184,6 +193,30 @@
 (defn decode-metar
   "Decode a metar"
   [metar]
-  (let [parts (split metar #" +")
+  (let [remarks-idx (-> metar (.indexOf "RMK"))
+        before-remarks (if (= -1 remarks-idx)
+                         metar
+                         (-> metar (.substring 0 remarks-idx)))
+        parts (split before-remarks #" +")
         icao (first parts)]
-    parts))
+    (->> parts
+         (map decode-part) ;; decode each part
+         (filter identity) ;; filter out nonsense
+         (reduce           ;; reduce into a nice package
+           (fn [result raw-part]
+             (let [part-type (-> raw-part keys first)
+                   part (get raw-part part-type)
+                   existing (get result part-type)]
+               (cond
+                 ;; existing is already a sequence; join onto it
+                 (vector? existing) (assoc result 
+                                       part-type 
+                                       (conj existing part))
+                 ;; existing value is not a sequence
+                 (not (nil? existing)) (assoc result
+                                              part-type
+                                              [existing part])
+                 ;; no existing value
+                 :else (assoc result part-type part)
+                 )))
+           {:icao icao})))) ;; initial result value

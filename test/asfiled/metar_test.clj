@@ -8,7 +8,7 @@
   "KLGA 171951Z 17017G22KT 10SM FEW050 SCT160 BKN230 26/14 A3005 RMK AO2 SLP176 T02610144")
 
 (def metar-rvrs
-  "KLGA 171951Z 17017G22KT 10SM FEW050 SCT160 BKN230 26/14 A3005 RMK AO2 SLP176 T02610144")
+  "KLGA 171951Z 17017G22KT 4SM R22L/3000M2500FT +RA SCT160 BKN230 26/14 A3005 RMK AO2 SLP176 T02610144")
 
 (defn eq-by-key
   [a b]
@@ -80,10 +80,10 @@
 
 (deftest temperature-test
   (testing "Positive"
-    (is (= {:temperature 20 :dewpoint 18} 
+    (is (= {:value 20 :dewpoint 18} 
            (decode-temperature "20/18"))))
   (testing "Negative"
-    (is (= {:temperature -20 :dewpoint -18} 
+    (is (= {:value -20 :dewpoint -18} 
            (decode-temperature "M20/M18")))))
 
 (deftest altimeter-test
@@ -94,18 +94,39 @@
   (testing "Variable"
     (is (= {:runway "22" :visibility {:from 2000
                                       :to 3500
-                                      :trans :variable}}
+                                      :as :variable}}
            (decode-rvr "R22/2000V3500FT")))
     (is (= {:runway "04R" :visibility {:from 2000
                                        :to 3500
-                                       :trans :more-than}}
+                                       :as :more-than}}
            (decode-rvr "R04R/2000P3500FT")))
     (is (= {:runway "22L" :visibility {:from 3000
                                        :to 2500
-                                       :trans :less-than}}
+                                       :as :less-than}}
            (decode-rvr "R22L/3000M2500FT")))))
 
 (deftest metar-test
   (testing metar-simple
     (let [metar (decode-metar metar-simple)]
-      (is (not (nil? metar))))))
+      (is (not (nil? metar)))
+      (is (= "KLGA" (:icao metar)))
+      (is (= 51 (-> metar :time (t/minute))))
+      (is (eq-by-key {:speed 17 :gust 22 :dir 170} 
+                     (-> metar :wind)))
+      (is (= 10 (:visibility metar)))
+      (is (nil? (:weather metar)))
+      (is (= 3 (-> metar :sky count)))
+      (is (eq-by-key {:type :few :ceiling 5000} (-> metar :sky first)))
+      (is (= 26 (-> metar :temperature :value)))
+      (is (= 14 (-> metar :temperature :dewpoint)))
+      (is (= 3005 (-> metar :altimeter)))))
+  (testing metar-rvrs
+    (let [metar (decode-metar metar-rvrs)]
+      (is (not (nil? metar)))
+      (is (eq-by-key {:runway "22L"
+                      :visibility {:from 3000
+                                   :to 2500
+                                   :as :less-than}}
+                     (:rvr metar)))
+      (is (= "Heavy Rain" (:weather metar)))
+      (is (= 2 (-> metar :sky count))))))
