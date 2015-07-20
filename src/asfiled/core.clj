@@ -84,8 +84,11 @@
              (str "(" (-> data :arrive :icao) ")"))
     (when-let [exits (-> data :exits)]
       (if-let [gate (:gate exits)]
-        (println "  - Via the" (upper-case (name gate)) "gate")
-        (println "  - Bearing" (:bearing exits)))
+        (println "  - Via the" (upper-case (name gate)) "gate"))
+      (println "  - Bearing" (:bearing exits))
+      (if (>= (:bearing exits) 180)
+        (println "    -> SW-EVEN")
+        (println "    -> NE-ODD"))
       (if-let [exit-points (:exits exits)]
         (println "  - Valid exits:" exit-points)))
     ;; filed route, if we have it
