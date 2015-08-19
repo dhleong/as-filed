@@ -6,15 +6,15 @@
 
 (def mock-result
   (generate-string
-    {:plan {:points [{:name "LAGUARDIA" :th "281"}]}}))
+    {:route [{:name "LAGUARDIA" :mh "293" :magvar "12.0"}]}))
 
 (def mock-result-failure
   (generate-string
-    {:plan {:points [{:name "LAGUARDIA"}]}}))
+    {:route [{:name "LAGUARDIA"}]}))
 
 (def mock-vor-result
   (generate-string
-    {:plan {:points [{:name "LAGUARDIA"} {:name "BRIDGEPORT" :type "VOD"}]}}))
+    {:route [{:name "LAGUARDIA"} {:n "BRIDGEPORT" :t "V"}]}))
 
 (def sop-exits-klga
   {:north [[290 360] [0 15]]
@@ -24,18 +24,18 @@
 
 (deftest load-bearing-test
   (testing "Load degrees"
-    (with-fake-http [#"dataLayer$" mock-result]
+    (with-fake-http [#"fpl" mock-result]
       (is (= 281 (load-bearing-to "klga" "kord")))))
   (testing "Gracefulness (eg VFR)"
-    (with-fake-http [#"dataLayer$" mock-result-failure]
+    (with-fake-http [#"fpl" mock-result-failure]
       (is (nil? (load-bearing-to "klga" "vfr"))))))
 
 (deftest load-vor-test
   (testing "Load VOR"
-    (with-fake-http [#"dataLayer$" mock-vor-result]
+    (with-fake-http [#"fpl" mock-vor-result]
       (let [loaded (load-vor "klga" "bdr")]
         (is (= "BRIDGEPORT" (:name loaded)))
-        (is (= "VOD" (:type loaded)))))))
+        (is (= "V" (:t loaded)))))))
 
 (deftest get-exit-test
   (testing "Get exit"

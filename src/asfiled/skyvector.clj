@@ -4,34 +4,35 @@
   (:require [org.httpkit.client :as http] 
             [cheshire.core :refer [parse-string]]))
 
-(def calculate-url "http://skyvector.com/api/dataLayer")
+(def calculate-url "http://skyvector.com/api/fpl")
 
 (defn- calculate-path
   [from to]
   (let [path (str from " " to)
-        options {:query-params {:cmd "planPts" :d path}}
+        options {:query-params {:cmd "route" :route path}}
         {:keys [err body]} @(http/get calculate-url options)]
     (when-let [json (parse-string body true)]
-      (-> json
-          :plan
-          :points))))
+      (-> json :route))))
 
 (defn load-bearing-to 
   "Get the bearing in degrees from one
   airport to another. Uses skyvector.com"
   [icao-from icao-to]
-  (when-let [degrees (-> (calculate-path icao-from icao-to)
-                         first
-                         :th)] ;; "true degrees"; :mh for magnetic 
-    (Integer/parseInt degrees)))
+  (when-let [data (-> (calculate-path icao-from icao-to) first)]
+    (when-let [degrees (:mh data)] ;; true no longer provided for free
+      (int (- (Integer/parseInt degrees)
+              (Double/parseDouble (:magvar data)))))))
 
 (defn load-vor
   "Lookup a VOR/Navaid/airport. An ICAO for an airport
   must be provided for reference since some symbols may
   be reused. Uses skyvector.com"
   [icao-from id]
-  (-> (calculate-path icao-from id)
-      second))
+  (let [base (-> (calculate-path icao-from id) second)]
+    (if (nil? (:name base))
+      (assoc base
+             :name (:n base))
+      base)))
 
 (defn get-bearing-to
   "See load-bearing-to. This method might cache results"
