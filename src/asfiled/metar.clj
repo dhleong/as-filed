@@ -101,11 +101,19 @@
 (defn decode-time
   [token]
   (let [today (t/today-at-midnight)
-        base (f/parse (f/formatter "ddHHmmZ") token)]
+        base (f/parse (f/formatter "ddHHmmZ") token)
+        the-day (t/day base)
+        ;; NB if the `today` is smaller than the
+        ;;  day on the base, that means we've crossed
+        ;;  a month boundary. EG: the metar was on
+        ;;  the 31st, and right now it's the 1st
+        the-month (if (> the-day (t/day today))
+                    (dec (t/month today))
+                    (t/month today))]
     (t/date-time 
       (t/year today)
-      (t/month today)
-      (t/day base)
+      the-month
+      the-day
       (t/hour base)
       (t/minute base))))
 
