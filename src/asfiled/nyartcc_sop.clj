@@ -60,7 +60,7 @@
 (def lga-land-catchall
   {:not []})
 (def jfk-depart-catchall
-  {:any [:jfk-depart-22r :jfk-depart-13 :jfk-depart-4l]})
+  {:any [:jfk-depart-22r :jfk-depart-13 :jfk-depart-4]})
 (def jfk-land-catchall
   {:any [:jfk-land-4 :jfk-land-dme22l :jfk-land-vis22l]})
 
