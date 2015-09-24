@@ -194,6 +194,7 @@
     ["LGA" 5]
     ["NTHNS" 4]
     ["TNNIS" 6]]
+   :magnetic-variation 10
    :runway-selection
    sop-runways-klga
    :sid-selection

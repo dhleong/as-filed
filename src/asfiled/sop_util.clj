@@ -9,7 +9,8 @@
 
 (defn match-runway
   [weather runway-descriptor]
-  (let [runway (:when runway-descriptor)]
+  (let [runway (:when runway-descriptor)
+        true-dir (:dir weather)]
     (and
       ;; speed 
       (within-range (:speed weather) (:speed runway))
@@ -89,14 +90,27 @@
   should be in use. 
   Weather should look like:
   {:speed 3 :dir 240 :rvr 3500}
-  :rvr may be omitted if none specified.
+  :rvr may be omitted if none specified. Direction should
+  be relative to true north if :magnetic-variation is 
+  specified in the SOP; otherwise, it should be relative
+  to magnetic north
   Returns:
   {:runways 'string description', :tags [:depart-1 :land-2]}"
   [sop weather]
   (when-let [runways (:runway-selection sop)]
-    (when-let [matched (filter #(match-runway weather %) runways)]
-      {:runways (join "\n" (map :use matched))
-       :tags (apply concat (map :tags matched))})))
+    (let [true-dir (:dir weather)
+          mag-var (:magnetic-variation sop 0)
+          adjusted-weather
+          (if (keyword? true-dir)
+            weather ;; nothing to do
+            (assoc weather
+                   :dir (+ true-dir mag-var)))]
+      (when-let [matched (filter 
+                           #(match-runway adjusted-weather %)
+                           runways)]
+       {:runways (join "\n" (map :use matched))
+        :tags (apply concat (map :tags matched))
+        :w adjusted-weather}))))
 
 (defn select-sid
   "Given a set of tags (as returned from select-runways)

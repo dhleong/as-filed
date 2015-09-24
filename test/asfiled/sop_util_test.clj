@@ -49,6 +49,12 @@
       (is (= [:lga-depart-31 :lga-land-22 :jfk-depart-31 :jfk-land-31]
              (:tags config)))
       (is (= 0 (-> text (.indexOf "LGA: Depart: 31"))))))
+  (testing "adjusted for magnetic variation"
+    (let [config (select-runways sop-klga {:speed 8 :dir 40})
+          text (:runways config)]
+      (is (= [:lga-depart-13 :lga-land-4 :jfk-depart-4 :jfk-land-4]
+             (:tags config)))
+      (is (= 0 (-> text (.indexOf "LGA: Depart: 13"))))))
   (testing "variable winds"
     (let [config (select-runways sop-klga {:speed 2 :dir :variable})
           text (:runways config)]
