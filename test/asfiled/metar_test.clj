@@ -103,7 +103,17 @@
     (is (= {:runway "22L" :visibility {:from 3000
                                        :to 2500
                                        :as :less-than}}
-           (decode-rvr "R22L/3000M2500FT")))))
+           (decode-rvr "R22L/3000M2500FT"))))
+  (testing "Less-than"
+    (is (= {:runway "22" :visibility {:is 2000
+                                      :as :less-than}}
+           (decode-rvr "R22/M2000FT"))))
+  (testing "Variable + Greater Than"
+    ;; this was observed
+    (is (= {:runway "22" :visibility {:from 2000
+                                      :to 3500
+                                      :as :more-than}}
+           (decode-rvr "R22/2000VP3500FT")))))
 
 (deftest metar-test
   (testing metar-simple
