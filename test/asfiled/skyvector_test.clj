@@ -37,6 +37,31 @@
         (is (= "BRIDGEPORT" (:name loaded)))
         (is (= "V" (:t loaded)))))))
 
+(deftest cached-calls-test
+  (testing "Get VOR"
+    (clear-cache)
+    (with-fake-http [#"fpl" "{}"]
+      (is (nil? (get-vor "klga" "bdr"))))
+    (with-fake-http [#"fpl" mock-vor-result]
+      (let [loaded (get-vor "klga" "bdr")]
+        (is (= "BRIDGEPORT" (:name loaded)))
+        (is (= "V" (:t loaded)))))
+    (with-fake-http [#"fpl" "{}"]
+      (let [loaded (get-vor "klga" "bdr")]
+        ;; should return the last, cached value
+        (is (= "BRIDGEPORT" (:name loaded)))
+        (is (= "V" (:t loaded)))))
+    (clear-cache))
+  (testing "Get Bearing"
+    (clear-cache)
+    (with-fake-http [#"fpl" "{}"]
+      (is (nil? (get-bearing-to "klga" "kord"))))
+    (with-fake-http [#"fpl" mock-result]
+      (is (= 281 (get-bearing-to "klga" "kord"))))
+    (with-fake-http [#"fpl" "{}"]
+      (is (= 281 (get-bearing-to "klga" "kord"))))
+    (clear-cache)))
+
 (deftest get-exit-test
   (testing "Get exit"
     (is (= :west (get-exit-to sop-exits-klga 281)))
