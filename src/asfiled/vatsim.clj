@@ -39,6 +39,12 @@
            (filter #(.startsWith % "url0"))
            (map #(.substring % url-start))))))
 
+(defn clear-data-cache
+  "Clear data cache; urls are kept"
+  []
+  (swap! data-cache-expires (constantly (t/now)))
+  (swap! data-cache (constantly {})))
+
 (defn get-data-urls
   "Get the list of data urls, cached."
   []
@@ -72,6 +78,14 @@
      :route (nth parts 30)
      }))
 
+(defn parse-server-data
+  "Parse a raw line of client data into a nice map"
+  [raw]
+  (let [parts (split raw #":")]
+    (zipmap
+      [:id :ip :location :name]
+      parts)))
+
 (defn- parse-data-line
   [dict line]
   (cond
@@ -95,6 +109,9 @@
       "!PREFILE"
       (let [client (parse-client-data line)]
         [[:prefile (:callsign client)] client])
+      "!SERVERS"
+      (let [server (parse-server-data line)]
+        [[:servers (:id server)] server])
       ;; unhandled section
       nil)))
 
@@ -134,10 +151,21 @@
   Cached data will be used when possible, and the
   cache will be updated as appropriate."
   [callsign]
-  (if-let [data (update-data)]
+  (when-let [data (update-data)]
     (or
       (get-in data [:clients callsign])
       (get-in data [:prefile callsign]))))
+
+(defn get-servers
+  "Load a seq of servers sorted by id. Cached
+  data will be used when possible; we will NOT
+  attempt to refresh cache, even if it's old,
+  as long as we have it; the servers do not
+  change frequently enough to necessitate the overhead."
+  []
+  (when-let [data (update-data)]
+    (when-let [servers (seq (vals (:servers data)))]
+      (sort-by :id servers))))
 
 (defn load-metar
   "Load the metar for an airport"

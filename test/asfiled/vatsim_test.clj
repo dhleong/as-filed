@@ -12,10 +12,18 @@
 (def wash-callsign "AAL2345")
 (def wash (str wash-callsign ":2345678:Hoban Washburne KAVL:::::::A321:415:KPIT:23000:KIAD:::::::0:I:125:125:0:32:2:9:KPIT:+VFPS+/V/PBN/A1B1C1D1O1S1 NAV/RNVD1E2A1 DOF/150712 REG/N321SB EET/KZDC0015 RMK/TCAS EQPT RMK/SIMBRIEF:MGW GIBBZ2:0:0:0:0:::::::"))
 
+(def usa-east "USA-E:97.107.135.245:New Jersey, USA:USA East:1:")
+
 (def data-raw
   (str "!GENERAL:\nVERSION = 8\nCONNECTED CLIENTS = 1\n;\n\n;\n!CLIENTS:\n" 
        mal "\n\n;\n!PREFILE:\n"
        wash "\n;"))
+
+(def server-data-raw
+  (str "!GENERAL:\nVERSION = 8\nCONNECTED CLIENTS = 0\n;\n\n;\n!CLIENTS:\n" 
+       "\n\n;\n!PREFILE:\n\n\n;\n!SERVERS:\n"
+       usa-east
+       "\n;"))
 
 (deftest data-urls-test
   (testing "Load data urls"
@@ -65,12 +73,32 @@
       (is (= "A321" (:craft parsed)))
       (is (= "MGW GIBBZ2" (:route parsed))))))
 
+(deftest parse-server-data-test
+  (testing "parse usa-east"
+    (let [parsed (parse-server-data usa-east)]
+      (is (= "USA East" (:name parsed)))
+      (is (= "USA-E" (:id parsed)))
+      (is (= "97.107.135.245" (:ip parsed)))
+      (is (= "New Jersey, USA" (:location parsed))))))
+
 (deftest getter-tests
   (testing "get-aircraft"
+    (clear-data-cache)
     (with-fake-http [#"status.txt$" data-urls-raw
                      #"vatsim-data.txt$" data-raw]
       (let [my-mal (get-aircraft mal-callsign)
             my-wash (get-aircraft wash-callsign)]
         ;; NB the actual parsing is tested above
         (is (not (nil? my-mal)))
-        (is (not (nil? my-wash)))))))
+        (is (not (nil? my-wash)))))
+    (clear-data-cache))
+  (testing "get-servers"
+    (clear-data-cache)
+    (with-fake-http [#"status.txt$" data-urls-raw
+                     #"vatsim-data.txt$" server-data-raw]
+      (let [servers (get-servers)]
+        (def foo servers)
+        ;; NB the actual parsing is tested above
+        (is (= 1 (count servers)))
+        (is (not (nil? (first servers))))))
+    (clear-data-cache)))
