@@ -19,6 +19,7 @@
 (def prompt-text "\nCallsign/VOR")
 (def nrepl-port 7888)
 (defonce runway-config nil)
+(defonce depart-config nil)
 
 ;;
 ;; Util methods
@@ -117,6 +118,10 @@
     ;; if we have a runway config, remind us
     (when-let [last-config runway-config]
       (println "* Current SID")
+      (format-config last-config))
+    ;; same for dep heading
+    (when-let [last-config depart-config]
+      (println "* Departure Headings")
       (format-config last-config))))
 
       
@@ -181,6 +186,11 @@
           (when-let [sid (snk/get-sid sink (:tags runways))]
             (def runway-config sid)
             (println "* SID Selection:")
+            (format-config sid))
+          (when-let [sid (snk/get-departure-headings
+                           sink (:tags runways))]
+            (def depart-config sid)
+            (println "* Departure Headings:")
             (format-config sid)))))))
 
 (defn- cli-runways
@@ -191,10 +201,14 @@
       (if-let [last-config runway-config]
         (format-config last-config)
         (println "No runway configuration yet"))
-      (when-let [config (snk/get-sid sink tags)]
-        (def runway-config config)
-        (println "* For runway tags" tags)
-        (format-config config)))))
+      (do
+        (when-let [config (snk/get-sid sink tags)]
+          (def runway-config config)
+          (println "* For runway tags" tags)
+          (format-config config))
+        (when-let [sid (snk/get-departure-headings sink tags)]
+          (println "* Departure Headings:")
+          (format-config sid))))))
 
 (defn- pick-cli-handler [input]
   (cond 

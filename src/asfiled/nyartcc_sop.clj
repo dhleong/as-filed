@@ -242,8 +242,33 @@
             {:not [:jfk-depart-31]} {:any [:jfk-land-4 :jfk-land-22]}]
      :use (join "\n"
                 ["ALL  (W/N/E Gates) [As Published] [JUTES#]"
-                 "JETS (South Gates) [Follow  RNAV] [HOPEA#]"])}
-    ]})
+                 "JETS (South Gates) [Follow  RNAV] [HOPEA#]"])}]
+    ;
+    :dep-heading-selection
+    [{:when [:lga-depart-4 :lga-land-13]
+      :use "4/13 (Any) (Any) [070]"}
+     {:when [:lga-depart-4 {:not [:lga-land-13]}]
+      :use (join "\n" 
+                 ["4/Other (Any) (WHITE (Jets)  / West) [360]"
+                  "4/Other (Any) (WHITE (Props) / else) [RWY]"])}
+     {:when [:lga-depart-13 lga-land-catchall]
+      :use (join "\n" 
+                 ["13 (Any DP) (Any)        [PUB]"
+                  "13 (None)   (FLUSHING)   [050]"
+                  "13 (None)   (CONEY)      [220]"
+                  "13 (None)   (WHITESTONE) [180]"
+                  "  - When est on 180: 'LEFT hdg 040'"
+                  "13 (None)   (MASPETH)    [180]"
+                  "  - When at 2500': 'RIGHT hdg 340'"])}
+     {:when [:lga-depart-22 lga-land-catchall]
+      :use (join "\n" 
+                 ["22 (HOPEA#/JUTES#) (Any) [PUB]"
+                  "22 (Any)           (Any) [070]"])}
+     {:when [:lga-depart-31 lga-land-catchall]
+      :use (join "\n" 
+                 ["31 (Any) (WHITE (Jets)  / West) [340]"
+                  "31 (Any) (WHITE (Props) / else) [360]"])}]
+    })
 
 ;; NB: For runway selection, we examine ALL options
 ;;  and evaluate ALL matches. This means we merge

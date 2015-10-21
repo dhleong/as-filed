@@ -54,6 +54,12 @@
     call that directly if they have an SOP.
     This method is optional; if no SOP for the facility
     is available, you may return nil.")
+  (get-departure-headings
+    [this tags]
+    "Given a set of tags indicating runway configuration,
+    calculate the departure heading choices to use. 
+    This method is optional; if no SOP for the facility
+    is available, you may return nil.")
   (get-sid
     [this tags]
     "Given a set of tags indicating runway configuration,

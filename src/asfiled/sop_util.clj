@@ -84,6 +84,7 @@
                  ;; and unnecessary ones
                  (= -1 (-> route (.indexOf amend))))))))))
 
+
 (defn select-runways
   "Given weather conditions and an SOP,
   figure out what runway configuration
@@ -112,13 +113,25 @@
         :tags (apply concat (map :tags matched))
         :w adjusted-weather}))))
 
-(defn select-sid
+(defn- select-tag-based
   "Given a set of tags (as returned from select-runways)
   and an SOP, figure out which SID should be used."
-  [sop tags]
-  (when-let [sids (:sid-selection sop)]
+  [sop tags section]
+  (when-let [sids (get sop section)]
     (when-let [matched (filter #(match-sid tags %) sids)]
       (join "\n\n" 
             (map 
               #(->> % :use (format-sids sop))
               matched)))))
+
+(defn select-dep-heading
+  "Given a set of tags (as returned from select-runways)
+  and an SOP, figure out which departure heading should be used."
+  [sop tags]
+  (select-tag-based sop tags :dep-heading-selection))
+
+(defn select-sid
+  "Given a set of tags (as returned from select-runways)
+  and an SOP, figure out which SID should be used."
+  [sop tags]
+  (select-tag-based sop tags :sid-selection))

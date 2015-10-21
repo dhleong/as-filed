@@ -10,7 +10,9 @@
              [nyartcc-sop :refer [get-sop]]
              [sink :as snk :refer [Sink]]
              [skyvector :refer [get-bearing-to get-exit-to]]
-             [sop-util :refer [select-runways select-sid get-common-amendments]]]))
+             [sop-util :refer [select-runways select-sid 
+                               select-dep-heading
+                               get-common-amendments ]]]))
 
 (def url-ais "http://nyartcc.org/aacisa")
 (def url-prd "http://nyartcc.org/prd/ajax.php")
@@ -115,6 +117,11 @@
   (get-runways [this weather] 
     (when-let [sop (get-sop my-icao)]
       (select-runways sop weather)))
+  (get-departure-headings [this tags] 
+    (when-let [sop (get-sop my-icao)]
+      (select-dep-heading 
+        sop 
+        (filter #(= 0 (.indexOf (name %) "lga")) tags))))
   (get-sid [this tags] 
     (when-let [sop (get-sop my-icao)]
       (select-sid sop tags)))

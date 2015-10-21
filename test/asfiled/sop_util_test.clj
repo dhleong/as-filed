@@ -119,3 +119,41 @@
       (is (true? (-> desc (.contains "As Published"))))
       (is (true? (-> desc (.contains "JUTES"))))
       (is (false? (-> desc (.contains "\n")))))))
+
+(deftest select-dep-heading-test
+  (testing "Runway 4/13"
+    (let [desc (select-dep-heading
+                 sop-klga
+                 [:lga-depart-4 :lga-land-13])]
+      (is (true? (-> desc (.contains "070"))))
+      (is (false? (-> desc (.contains "360"))))))
+  (testing "Runway 4/31"
+    (let [desc (select-dep-heading
+                 sop-klga
+                 [:lga-depart-4 :lga-land-31])]
+      (is (false? (-> desc (.contains "070"))))
+      (is (true? (-> desc (.contains "360"))))
+      (is (true? (-> desc (.contains "RWY"))))))
+  (testing "Runway 13/Any"
+    (let [desc (select-dep-heading
+                 sop-klga
+                 [:lga-depart-13 :lga-land-22])]
+      (is (false? (-> desc (.contains "070"))))
+      (is (false? (-> desc (.contains "360"))))
+      (is (true? (-> desc (.contains "FLUSHING"))))))
+  (testing "Runway 22/Any"
+    (let [desc (select-dep-heading
+                 sop-klga
+                 [:lga-depart-22 :lga-land-31])]
+      (is (true? (-> desc (.contains "070"))))
+      (is (false? (-> desc (.contains "360"))))
+      (is (true? (-> desc (.contains "HOPEA"))))))
+  (testing "Runway 31/Any"
+    (let [desc (select-dep-heading
+                 sop-klga
+                 [:lga-depart-31 :lga-land-22])]
+      (is (false? (-> desc (.contains "070"))))
+      (is (true? (-> desc (.contains "360"))))
+      (is (true? (-> desc (.contains "340"))))
+      (is (false? (-> desc (.contains "HOPEA")))))))
+
