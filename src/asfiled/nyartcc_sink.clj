@@ -1,7 +1,7 @@
 (ns ^{:author "Daniel Leong"
       :doc "Sink implementation using nyartcc.org resources"}
   asfiled.nyartcc-sink
-  (:require [clojure.string :refer [trim]]
+  (:require [clojure.string :refer [lower-case trim]]
             [org.httpkit.client :as http] 
             [hickory
              [core :refer [parse parse-fragment as-hickory]]
@@ -119,9 +119,12 @@
       (select-runways sop weather)))
   (get-departure-headings [this tags] 
     (when-let [sop (get-sop my-icao)]
-      (select-dep-heading 
-        sop 
-        (filter #(= 0 (.indexOf (name %) "lga")) tags))))
+      (let [filter-icao (-> my-icao
+                            lower-case
+                            (subs 1))] 
+        (select-dep-heading 
+          sop 
+          (filter #(= 0 (.indexOf (name %) filter-icao)) tags)))))
   (get-sid [this tags] 
     (when-let [sop (get-sop my-icao)]
       (select-sid sop tags)))
