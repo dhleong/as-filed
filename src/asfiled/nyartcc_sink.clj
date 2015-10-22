@@ -12,6 +12,7 @@
              [skyvector :refer [get-bearing-to get-exit-to]]
              [sop-util :refer [select-runways select-sid 
                                select-dep-heading
+                               select-missed-approach
                                get-common-amendments ]]]))
 
 (def url-ais "http://nyartcc.org/aacisa")
@@ -123,6 +124,14 @@
                             lower-case
                             (subs 1))] 
         (select-dep-heading 
+          sop 
+          (filter #(= 0 (.indexOf (name %) filter-icao)) tags)))))
+  (get-missed-approach [this tags] 
+    (when-let [sop (get-sop my-icao)]
+      (let [filter-icao (-> my-icao
+                            lower-case
+                            (subs 1))] 
+        (select-missed-approach
           sop 
           (filter #(= 0 (.indexOf (name %) filter-icao)) tags)))))
   (get-sid [this tags] 

@@ -20,6 +20,7 @@
 (def nrepl-port 7888)
 (defonce runway-config nil)
 (defonce depart-config nil)
+(defonce missed-config nil)
 
 ;;
 ;; Util methods
@@ -122,6 +123,10 @@
     ;; same for dep heading
     (when-let [last-config depart-config]
       (println "* Departure Headings")
+      (format-config last-config))
+    ;; and missed approach
+    (when-let [last-config missed-config]
+      (println "* Missed approach")
       (format-config last-config))))
 
       
@@ -191,6 +196,11 @@
                            sink (:tags runways))]
             (def depart-config sid)
             (println "* Departure Headings:")
+            (format-config sid))
+          (when-let [sid (snk/get-missed-approach
+                           sink (:tags runways))]
+            (def missed-config sid)
+            (println "* Missed Approach:")
             (format-config sid)))))))
 
 (defn- cli-runways

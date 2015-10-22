@@ -60,6 +60,12 @@
     calculate the departure heading choices to use. 
     This method is optional; if no SOP for the facility
     is available, you may return nil.")
+  (get-missed-approach
+    [this tags]
+    "Given a set of tags indicating runway configuration,
+    calculate the missed approach procedures to use. 
+    This method is optional; if no SOP for the facility
+    is available, you may return nil.")
   (get-sid
     [this tags]
     "Given a set of tags indicating runway configuration,

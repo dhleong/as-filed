@@ -268,6 +268,28 @@
       :use (join "\n" 
                  ["31 (Any) (WHITE (Jets)  / West) [340]"
                   "31 (Any) (WHITE (Props) / else) [360]"])}]
+    ;
+    :missed-approaches
+    [{:when [:lga-depart-4 :lga-land-13]
+      :use "[RWY HDG] [2000'] [DEPARTURE] (Stop)"}
+     {:when [:lga-depart-4 :lga-land-31]
+      :use "[HDG 340] [3000'] [DEPARTURE] (Stop)"}
+     {:when [:lga-depart-4 :lga-land-4]
+      :use "[HDG 340] [2000'] [DEPARTURE] (Stop)"}
+     {:when [:lga-depart-13 :lga-land-4]
+      :use "[RWY HDG] [2000'] [HAARP]"}
+     {:when [:lga-depart-13 :lga-land-22]
+      :use "[RWY HDG] [2000'] [EMPYR] (Stop if MASPETH/GLDMN)"}
+     {:when [:lga-depart-13 :lga-land-13]
+      :use "[HDG 080] [2000'] [DEPARTURE] (Stop)"}
+     {:when [:lga-depart-22 :lga-land-22]
+      :use "[RWY HDG] [2000'] [EMPYR] (Stop)"}
+     {:when [:lga-depart-31 :lga-land-4]
+      :use "[RWY HDG] [2000'] [HAARP]"}
+     {:when [:lga-depart-31 :lga-land-22]
+      :use "[RWY HDG] [2000'] [EMPYR]"}
+     {:when [:lga-depart-31 :lga-land-31]
+      :use "[HDG 040] [3000'] [FINAL] (Stop)"}]
     })
 
 ;; NB: For runway selection, we examine ALL options

@@ -130,6 +130,12 @@
   [sop tags]
   (select-tag-based sop tags :dep-heading-selection))
 
+(defn select-missed-approach
+  "Given a set of tags (as returned from select-runways)
+  and an SOP, figure out which missed approach procedures should be used."
+  [sop tags]
+  (select-tag-based sop tags :missed-approaches))
+
 (defn select-sid
   "Given a set of tags (as returned from select-runways)
   and an SOP, figure out which SID should be used."
