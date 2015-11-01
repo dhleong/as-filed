@@ -48,6 +48,21 @@
                       (repeat "  - ")
                       (split config #"\n")))))
 
+(defn update-runways
+  [sink tags]
+  (when-let [sid (snk/get-sid sink tags)]
+    (def runway-config sid)
+    (println "* SID Selection:")
+    (format-config sid))
+  (when-let [sid (snk/get-departure-headings sink tags)]
+    (def depart-config sid)
+    (println "* Departure Headings:")
+    (format-config sid))
+  (when-let [sid (snk/get-missed-approach sink tags)]
+    (def missed-config sid)
+    (println "* Missed Approach:")
+    (format-config sid)))
+
 
 ;;
 ;; Handler functions, possibly testable
@@ -188,20 +203,7 @@
                             :rvr (-> metar :rvr :visibility :from)})]
           (println "* Runways in use:" (:tags runways))
           (println "  -" (-> runways :runways (.replace "\n", "\n  - ")))
-          (when-let [sid (snk/get-sid sink (:tags runways))]
-            (def runway-config sid)
-            (println "* SID Selection:")
-            (format-config sid))
-          (when-let [sid (snk/get-departure-headings
-                           sink (:tags runways))]
-            (def depart-config sid)
-            (println "* Departure Headings:")
-            (format-config sid))
-          (when-let [sid (snk/get-missed-approach
-                           sink (:tags runways))]
-            (def missed-config sid)
-            (println "* Missed Approach:")
-            (format-config sid)))))))
+          (update-runways sink (:tags runways)))))))
 
 (defn- cli-runways
   [sink input]
@@ -211,14 +213,7 @@
       (if-let [last-config runway-config]
         (format-config last-config)
         (println "No runway configuration yet"))
-      (do
-        (when-let [config (snk/get-sid sink tags)]
-          (def runway-config config)
-          (println "* For runway tags" tags)
-          (format-config config))
-        (when-let [sid (snk/get-departure-headings sink tags)]
-          (println "* Departure Headings:")
-          (format-config sid))))))
+      (update-runways sink tags))))
 
 (defn- pick-cli-handler [input]
   (cond 
