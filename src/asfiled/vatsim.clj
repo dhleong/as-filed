@@ -9,11 +9,13 @@
 ;;; Constants
 ;;;
 
-(def status-url "http://status.vatsim.net/status.txt")
+(def status-url "http://status.vatsim.net")
 
 ;; this *should* be loaded from status-url, but....
 (def metar-url "http://metar.vatsim.net/metar.php")
 
+;; url type for only servers
+(def server-url-type :url1)
 
 ;;;
 ;;; Globals
@@ -27,17 +29,23 @@
 ;; Functions
 ;;
 
-(defn- load-data-urls
+(defn into-seq-map
+  [pairs]
+  (let [k (keyword (-> pairs first first))]
+    {k (map second pairs)}))
+
+(defn load-data-urls
   "Load the list of data urls. No caching"
   [& _]
-  (let [{:keys [error body]} @(http/get status-url)
-        url-start (.length "url0=")
-        ]
+  (let [{:keys [error body]} @(http/get status-url)]
     (if error
       []
       (->> (split-lines body)
-           (filter #(.startsWith % "url0"))
-           (map #(.substring % url-start))))))
+           (filter #(.startsWith % "url"))
+           (map #(split % #"="))
+           (split-with #(= "url0" (first %)))
+           (map into-seq-map)
+           (apply merge)))))
 
 (defn clear-data-cache
   "Clear data cache; urls are kept"
@@ -45,18 +53,35 @@
   (swap! data-cache-expires (constantly (t/now)))
   (swap! data-cache (constantly {})))
 
-(defn get-data-urls
-  "Get the list of data urls, cached."
+(defn clear-data-urls-cache
+  "Clear cached urls"
   []
+  (swap! data-urls (constantly false)))
+
+(defn get-data-urls
+  "Get the list of data urls, cached. You may pass
+  the optional key :type to specify which type of
+  url; if you only need the server names, for example,
+  you should call as :type :server"
+  [& {:keys [type]
+      :or {type nil}}]
   (let [cached @data-urls]
-    (if cached
-      cached
-      (swap! data-urls load-data-urls))))
+    (let [all-urls (if cached
+                     cached
+                     (swap! data-urls load-data-urls))]
+      (case type
+        :server (get all-urls server-url-type)
+        :url0 (get all-urls type)
+        :url1 (get all-urls type)
+        nil (get all-urls :url0)))))
 
 (defn load-data
   "Load the raw vatsim data from a random data url"
-  []
-  (let [urls (get-data-urls)
+  [& {:keys [only-server?]
+      :or [only-server? false]}]
+  (let [url-type (when only-server?
+                   :server)
+        urls (get-data-urls :type url-type)
         url (rand-nth urls)
         {:keys [error body]} @(http/get url)]
     (if error
@@ -132,13 +157,14 @@
 
 (defn- update-data
   "Ensure we have data cached and up-to-date"
-  []
+  [& {:keys [only-server?]
+      :or [only-server? false]}]
   (let [cache-expires @data-cache-expires
         cache-data @data-cache]
     (if (-> cache-expires (t/after? (t/now)))
       ;; data valid!
       cache-data
-      (let [raw (load-data)
+      (let [raw (load-data :only-server? only-server?)
             parsed (parse-data raw)]
         ; TODO use the "reload" general setting for expiry?
         (swap! data-cache-expires 
@@ -161,9 +187,12 @@
   data will be used when possible; we will NOT
   attempt to refresh cache, even if it's old,
   as long as we have it; the servers do not
-  change frequently enough to necessitate the overhead."
-  []
-  (when-let [data (update-data)]
+  change frequently enough to necessitate the overhead.
+  Note that you may pass the keyword param `:only? true`
+  if you don't need any other data."
+  [& {:keys [only?]
+      :or [only? false]}]
+  (when-let [data (update-data :only-server? only?)]
     (when-let [servers (seq (vals (:servers data)))]
       (sort-by :id servers))))
 

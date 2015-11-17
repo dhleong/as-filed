@@ -1,10 +1,15 @@
 (ns asfiled.vatsim-test
   (:use org.httpkit.fake)
-  (:require [clojure.test :refer :all]
+  (:require [clojure
+             [string :refer [join]]
+             [test :refer :all]]
             [asfiled.vatsim :refer :all]))
 
 (def data-urls-raw
-  "url0=http://vatsim.aircharts.org/vatsim-data.txt\nurl0=http://vatsim-data.hardern.net/vatsim-data.txt")
+  (join "\n"
+        ["url0=http://vatsim.aircharts.org/vatsim-data.txt" 
+         "url0=http://vatsim-data.hardern.net/vatsim-data.txt"
+         "url1=http://vatsim-data.hardern.net/vatsim-servers.txt"]))
 
 (def mal-callsign "AAL1234")
 (def mal (str mal-callsign ":1234567:Malcolm Reynolds - KMCO:PILOT::33.28706:-79.92776:35145:477:T/B738/F:470:KMIA:35000:KBOS:USA-E:100:1:1013:::3:I:0:7:0:0:0:0:KPVD:/t/:+HEDLY2 HEDLY J53 CRG J55 RDU J55 HPW PXT J191 RBV J222 JFK ROBUC1:0:0:0:0:::20150712010627:12:30.064:1018:"))
@@ -25,13 +30,27 @@
        usa-east
        "\n;"))
 
+(deftest into-seq-map-test
+  (testing "Single element"
+    (is (= {:url0 ["Foo Bar"]}
+           (into-seq-map [["url0" "Foo Bar"]]))))
+  (testing "Multi-element"
+    (is (= {:url0 ["Foo" "Bar"]}
+           (into-seq-map [["url0" "Foo"]
+                          ["url0" "Bar"]])))))
+
 (deftest data-urls-test
   (testing "Load data urls"
-    (with-fake-http [#"status.txt$" data-urls-raw]
+    (clear-data-urls-cache)
+    (with-fake-http [#"status.vatsim.net$" data-urls-raw]
       (let [loaded (get-data-urls)]
         (is (= 2 (count loaded)))
         (is (= "http://vatsim.aircharts.org/vatsim-data.txt" (first loaded)))
-        (is (= "http://vatsim-data.hardern.net/vatsim-data.txt" (second loaded))))))
+        (is (= "http://vatsim-data.hardern.net/vatsim-data.txt" (second loaded))))
+      (let [loaded (get-data-urls :type :server)]
+        (is (= 1 (count loaded)))
+        (is (= "http://vatsim-data.hardern.net/vatsim-servers.txt"
+               (first loaded))))))
   (testing "Load from cache"
     (with-fake-http []
       (let [loaded (get-data-urls)]
@@ -41,7 +60,7 @@
 
 (deftest data-test
   (testing "Load data"
-    (with-fake-http [#"status.txt$" data-urls-raw
+    (with-fake-http [#"status.vatsim.net" data-urls-raw
                      #"vatsim-data.txt$" data-raw]
       (let [loaded (load-data)]
         (is (= data-raw loaded)))))
@@ -84,7 +103,7 @@
 (deftest getter-tests
   (testing "get-aircraft"
     (clear-data-cache)
-    (with-fake-http [#"status.txt$" data-urls-raw
+    (with-fake-http [#"status.vatsim.net" data-urls-raw
                      #"vatsim-data.txt$" data-raw]
       (let [my-mal (get-aircraft mal-callsign)
             my-wash (get-aircraft wash-callsign)]
@@ -94,11 +113,18 @@
     (clear-data-cache))
   (testing "get-servers"
     (clear-data-cache)
-    (with-fake-http [#"status.txt$" data-urls-raw
+    (with-fake-http [#"status.vatsim.net" data-urls-raw
                      #"vatsim-data.txt$" server-data-raw]
       (let [servers (get-servers)]
-        (def foo servers)
         ;; NB the actual parsing is tested above
+        (is (= 1 (count servers)))
+        (is (not (nil? (first servers))))))
+    (clear-data-cache))
+  (testing "get-servers :only?"
+    (clear-data-cache)
+    (with-fake-http [#"status.vatsim.net" data-urls-raw
+                     #"vatsim-servers.txt$" server-data-raw]
+      (let [servers (get-servers :only? true)]
         (is (= 1 (count servers)))
         (is (not (nil? (first servers))))))
     (clear-data-cache)))
