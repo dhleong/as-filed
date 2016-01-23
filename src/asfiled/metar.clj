@@ -186,8 +186,16 @@
         vis-parts (->> vis (re-find #"(\d*)([VMP]{1,2})(\d+)"))]
     {:runway runway
      :visibility (assoc
-                   (if (empty? (second vis-parts))
+                   (cond
+                     (nil? vis-parts)
+                     {:is (->> parts 
+                               second 
+                               (re-find #"(\d*)")
+                               first
+                               as-int)}
+                     (empty? (second vis-parts))
                      {:is (-> vis-parts last as-int)}
+                     :else
                      {:from (-> vis-parts second as-int)
                       :to (-> vis-parts last as-int)})
                    :as (case (nth vis-parts 2)
@@ -195,7 +203,8 @@
                          "M" :less-than
                          "P" :more-than
                          "VM" :less-than
-                         "VP" :more-than))}))
+                         "VP" :more-than
+                         :exact))}))
 
 (def metar-parts
   {:time [#"^[0-9]+Z$" decode-time]
